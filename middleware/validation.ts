@@ -14,14 +14,14 @@ const validateRequest = (schema: z.ZodSchema) => {
           message: err.message,
         }));
 
-        return res.status(400).json({
+        res.status(400).json({
           status: "error",
           message: "Validation failed",
           errors: formattedErrors,
         });
       }
 
-      return res.status(500).json({
+      res.status(500).json({
         status: "error",
         message: "Internal server error",
       });

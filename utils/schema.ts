@@ -28,7 +28,7 @@ const currentSubscriptionSchema = z.object({
   startDate: z.date(),
   endDate: z.date(),
   autoRenew: z.boolean().default(false),
-  paymentMethod: z.string().optional(),
+  paymentMethod: z.enum(["card", "bank", "cash"]).default("card"),
   paymentStatus: z.enum(["pending", "approved", "declined"]).default("pending"),
   transactionId: z.string().optional(),
 });

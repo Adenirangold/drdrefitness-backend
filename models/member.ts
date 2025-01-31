@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SubscriptionData } from "../types";
 
 const Schema = mongoose.Schema;
 
@@ -158,6 +159,17 @@ memberSchema.pre("save", function (next) {
 
   next();
 });
+
+memberSchema.methods.updateSubscription = async function (
+  subscriptionData: SubscriptionData
+) {
+  this.currentSubscription = {
+    ...this.currentSubscription.toObject(),
+    ...subscriptionData,
+  };
+  await this.save();
+  return this;
+};
 
 const Member = mongoose.model("Member", memberSchema);
 export default Member;
