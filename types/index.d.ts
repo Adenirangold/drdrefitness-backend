@@ -1,8 +1,8 @@
 import z from "zod";
-import { userSchema } from "../utils/schema";
+import { memberSchema } from "../utils/schema";
 
 declare global {
-  type UserInput = z.infer<typeof userSchema>;
+  type UserInput = z.infer<typeof memberSchema>;
 }
 
 export {};

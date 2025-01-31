@@ -14,8 +14,8 @@ const emergencyContactSchema = z.object({
 });
 
 const healthInfoSchema = z.object({
-  height: z.coerce.number().positive(),
-  weight: z.coerce.number().positive(),
+  height: z.coerce.number().positive().optional(),
+  weight: z.coerce.number().positive().optional(),
   medicalConditions: z.array(z.string()).optional(),
   allergies: z.array(z.string()).optional(),
 });
@@ -28,12 +28,12 @@ const currentSubscriptionSchema = z.object({
   startDate: z.date(),
   endDate: z.date(),
   autoRenew: z.boolean().default(false),
-  paymentMethod: z.string(),
+  paymentMethod: z.string().optional(),
   paymentStatus: z.enum(["pending", "approved", "declined"]).default("pending"),
   transactionId: z.string().optional(),
 });
 
-export const userSchema = z.object({
+export const memberSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
