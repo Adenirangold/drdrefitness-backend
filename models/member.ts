@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { SubscriptionData } from "../types";
+import bcrypt from "bcryptjs";
+import { hashPassword } from "../lib/util";
 
 const Schema = mongoose.Schema;
 
@@ -134,6 +136,17 @@ const memberSchema = new Schema(
   },
   { timestamps: true }
 );
+
+memberSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  try {
+    const hashedPassword = await hashPassword(this.password);
+    this.password = hashedPassword;
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 memberSchema.pre("save", function (next) {
   if (this.isModified("currentSubscription")) {
