@@ -7,11 +7,8 @@ export const createMember = async (
   next: NextFunction
 ) => {
   try {
-    const member = await Member.create(req.body);
-    res.status(201).json({
-      status: "success",
-      data: member,
-    });
+    console.log(req.body);
+    res.status(201).json({ status: "success", message: "Member created" });
   } catch (error) {
     res.status(500).json({
       status: "error",

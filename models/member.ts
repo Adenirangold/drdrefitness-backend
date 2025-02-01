@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { SubscriptionData } from "../types";
+import { SubscriptionData, UserInput } from "../types";
 import bcrypt from "bcryptjs";
 import { hashPassword } from "../lib/util";
 
@@ -88,6 +88,12 @@ const memberSchema = new Schema(
       enum: ["user", "admin", "coach", "director"],
       default: "user",
     },
+    adminlocation: {
+      type: String,
+      required: function (this: UserInput) {
+        return this?.role === "admin";
+      },
+    },
 
     isActive: {
       type: Boolean,
@@ -144,7 +150,7 @@ memberSchema.pre("save", async function (next) {
     this.password = hashedPassword;
     next();
   } catch (error) {
-    next(error);
+    next(error as Error);
   }
 });
 

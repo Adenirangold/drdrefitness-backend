@@ -10,6 +10,22 @@ const planSchema = new Schema({
     trim: true,
   },
 
+  gymLocation: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
+  gymBranch: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+
+  benefits: {
+    type: [String],
+  },
+
   price: {
     type: Number,
     required: true,

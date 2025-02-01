@@ -33,6 +33,11 @@ const currentSubscriptionSchema = z.object({
   transactionId: z.string().optional(),
 });
 
+const gymlocationSchema = z.object({
+  branch: z.string().min(1, "Branch is required"),
+  location: z.string().min(1, "Location is required"),
+});
+
 export const memberSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
@@ -46,6 +51,7 @@ export const memberSchema = z.object({
   emergencyContact: emergencyContactSchema,
   healthInfo: healthInfoSchema,
   role: z.enum(["user", "admin", "coach", "director"]).default("user"),
+  adminlocation: z.string().optional(),
   isActive: z.boolean().default(true),
   currentSubscription: currentSubscriptionSchema,
 });
