@@ -25,17 +25,12 @@ const currentSubscriptionSchema = z.object({
   status: z
     .enum(["active", "expired", "suspended", "cancelled"])
     .default("active"),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
   autoRenew: z.boolean().default(false),
   paymentMethod: z.enum(["card", "bank", "cash"]).default("card"),
   paymentStatus: z.enum(["pending", "approved", "declined"]).default("pending"),
   transactionId: z.string().optional(),
-});
-
-const gymlocationSchema = z.object({
-  branch: z.string().min(1, "Branch is required"),
-  location: z.string().min(1, "Location is required"),
 });
 
 export const memberSchema = z.object({
@@ -44,12 +39,12 @@ export const memberSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   phoneNumber: z.string().min(11).max(15),
-  dateOfBirth: z.date(),
+  dateOfBirth: z.coerce.date(),
   gender: z.enum(["male", "female"]),
   profilePicture: z.string().optional(),
   address: addressSchema,
   emergencyContact: emergencyContactSchema,
-  healthInfo: healthInfoSchema,
+  healthInfo: healthInfoSchema.optional(),
   role: z.enum(["user", "admin", "coach", "director"]).default("user"),
   adminlocation: z.string().optional(),
   isActive: z.boolean().default(true),
