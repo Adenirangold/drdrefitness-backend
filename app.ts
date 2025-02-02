@@ -29,6 +29,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(err.statusCode).json({
       status: err.status,
       error: err,
+      validationErrors: err.validationErrors,
       message: err.message,
       stack: err.stack,
     });
@@ -37,6 +38,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
       res.status(err.statusCode).json({
         status: err.status,
         message: err.message,
+        validationErrors: err.validationErrors,
       });
     } else {
       console.error("ERROR 💥", err);

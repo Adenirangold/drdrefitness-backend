@@ -1,5 +1,6 @@
 import z from "zod";
 import { Request, Response, NextFunction } from "express";
+import AppError from "../utils/AppError";
 
 const validateRequest = (schema: z.ZodSchema) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -14,17 +15,16 @@ const validateRequest = (schema: z.ZodSchema) => {
           message: err.message,
         }));
 
-        res.status(400).json({
-          status: "error",
-          message: "Validation failed",
-          errors: formattedErrors,
-        });
+        const appError = new AppError(
+          "Validation failed",
+          400,
+          formattedErrors
+        );
+
+        return next(appError);
       }
 
-      res.status(500).json({
-        status: "error",
-        message: "Internal server error",
-      });
+      next(new AppError("Internal server error", 500));
     }
   };
 };
