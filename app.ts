@@ -4,6 +4,7 @@ import cors from "cors";
 
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
+import planRoute from "./routes/planRoute";
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use(
 app.use(express.json());
 
 app.use("/api/members", memberRoute);
+app.use("/api/plans", planRoute);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   err.statusCode = err.statusCode || 500;

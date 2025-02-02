@@ -50,3 +50,12 @@ export const memberSchema = z.object({
   isActive: z.boolean().default(true),
   currentSubscription: currentSubscriptionSchema,
 });
+
+export const planSchema = z.object({
+  name: z.string().min(2).max(50),
+  gymLocation: z.string().min(2).max(50),
+  gymBranch: z.string().min(2).max(50),
+  benefits: z.array(z.string()),
+  price: z.coerce.number().positive(),
+  duration: z.coerce.number().positive(),
+});
