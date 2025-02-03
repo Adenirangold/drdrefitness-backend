@@ -16,11 +16,14 @@ export const createMember = async (
 
     res
       .status(201)
-      .json({ status: "success", message: "Member created sucessfully" });
+      .json({
+        status: "success",
+        message: "Member created sucessfully",
+        member: savedMember,
+      });
   } catch (error) {
     console.log(error);
-    next(error);
 
-    // next(new AppError("Error occured in creating new member", 500));
+    next(new AppError("Error occured in creating new member", 500));
   }
 };

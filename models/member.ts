@@ -154,6 +154,13 @@ memberSchema.pre("save", async function (next) {
   }
 });
 
+memberSchema.set("toJSON", {
+  transform: function (doc, ret, options) {
+    delete ret.password;
+    return ret;
+  },
+});
+
 memberSchema.pre("save", function (next) {
   if (this.isModified("currentSubscription")) {
     const subscription = this.currentSubscription;
