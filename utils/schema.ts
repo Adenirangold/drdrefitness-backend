@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 
 const addressSchema = z.object({
@@ -21,7 +22,9 @@ const healthInfoSchema = z.object({
 });
 
 const currentSubscriptionSchema = z.object({
-  plan: z.string().min(1, "Plan ID is required"),
+  plan: z
+    .string()
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
   status: z
     .enum(["active", "expired", "suspended", "cancelled"])
     .default("active"),
