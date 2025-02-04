@@ -1,7 +1,8 @@
 import e, { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
-import { comparePasswords } from "../lib/util";
+import { comparePasswords, getJWTToken, sendAuthResponse } from "../lib/util";
+import { get } from "mongoose";
 
 export const signup = async (
   req: Request,
@@ -22,14 +23,19 @@ export const signup = async (
     const savedMember = await newMember.save();
     savedMember.password = "";
 
-    console.log(savedMember);
+    if (!savedMember) {
+      return next(new AppError("Error creating new member", 500));
+    }
+
+    const token = getJWTToken(savedMember._id.toString());
+    if (!token) {
+      return next(new AppError("Error generating token", 500));
+    }
 
     res.status(201).json({
       status: "Success",
       message: "Member created sucessfully",
-      data: {
-        member: savedMember,
-      },
+      token,
     });
   } catch (error) {
     console.log(error);
@@ -60,14 +66,10 @@ export const login = async (
       return next(new AppError("Invalid email or password", 401));
     }
 
-    res.status(200).json({
-      status: "Success",
-      message: "Member logged in successfully",
-      data: {
-        member: existingMember,
-      },
-    });
+    sendAuthResponse(res, existingMember._id, existingMember.email);
   } catch (error) {
+    console.log(error);
+
     next(new AppError("Error occured logging in member", 500));
   }
 };

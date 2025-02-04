@@ -1,4 +1,11 @@
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import { Response } from "express";
+import { Types } from "mongoose";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { AuthResponse } from "../types";
+
+dotenv.config();
 
 export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
@@ -10,4 +17,62 @@ export const comparePasswords = async (
   hashedPassword: string
 ) => {
   return bcrypt.compare(password, hashedPassword);
+};
+
+interface TokenPayload {
+  id: string;
+}
+
+export const getJWTToken = (id: string): string => {
+  const secret = process.env.JWT_SECRET;
+  const expiresIn = process.env.JWT_EXPIRES_IN;
+
+  if (!secret) {
+    throw new Error("JWT_SECRET must be defined in environment variables");
+  }
+
+  const options: SignOptions = {
+    expiresIn: Number(expiresIn),
+    algorithm: "HS256",
+  };
+
+  try {
+    return jwt.sign(
+      { id } as TokenPayload,
+      Buffer.from(secret, "utf-8"),
+      options
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to generate JWT token: ${(error as Error).message}`
+    );
+  }
+};
+
+export const sendAuthResponse = (
+  res: Response,
+  userId: Types.ObjectId,
+  email: string
+): void => {
+  try {
+    const token = getJWTToken(userId.toString());
+
+    const authResponse: AuthResponse = {
+      data: {
+        id: userId.toString(),
+        email,
+      },
+      token,
+    };
+
+    res.status(200).json({
+      status: "success",
+      data: authResponse,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: "Failed to generate authentication token",
+    });
+  }
 };
