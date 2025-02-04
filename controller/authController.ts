@@ -1,8 +1,7 @@
 import e, { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
-import { comparePasswords, getJWTToken, sendAuthResponse } from "../lib/util";
-import { get } from "mongoose";
+import { comparePasswords, sendAuthResponse } from "../lib/util";
 
 export const signup = async (
   req: Request,
@@ -27,16 +26,7 @@ export const signup = async (
       return next(new AppError("Error creating new member", 500));
     }
 
-    const token = getJWTToken(savedMember._id.toString());
-    if (!token) {
-      return next(new AppError("Error generating token", 500));
-    }
-
-    res.status(201).json({
-      status: "Success",
-      message: "Member created sucessfully",
-      token,
-    });
+    sendAuthResponse(res, savedMember._id, savedMember.email);
   } catch (error) {
     console.log(error);
 

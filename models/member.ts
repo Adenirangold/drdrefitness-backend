@@ -84,7 +84,7 @@ const memberSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin", "coach", "director"],
+      enum: ["user", "admin", "director"],
       default: "user",
     },
     adminlocation: {

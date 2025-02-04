@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { Response } from "express";
 import { Types } from "mongoose";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { AuthResponse } from "../types";
+import { AuthResponse, TokenPayload } from "../types";
 
 dotenv.config();
 
@@ -18,10 +18,6 @@ export const comparePasswords = async (
 ) => {
   return bcrypt.compare(password, hashedPassword);
 };
-
-interface TokenPayload {
-  id: string;
-}
 
 export const getJWTToken = (id: string): string => {
   const secret = process.env.JWT_SECRET;
@@ -67,12 +63,26 @@ export const sendAuthResponse = (
 
     res.status(200).json({
       status: "success",
+      message: "Authentication successful",
       data: authResponse,
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
-      error: "Failed to generate authentication token",
+      message: "Failed to generate authentication token",
     });
+  }
+};
+
+export const verifyToken = (token: string): TokenPayload | null => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET must be defined in environment variables");
+  }
+
+  try {
+    return jwt.verify(token, Buffer.from(secret, "utf-8")) as TokenPayload;
+  } catch (error) {
+    return null;
   }
 };

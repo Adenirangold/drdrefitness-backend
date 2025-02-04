@@ -11,3 +11,6 @@ export interface AuthResponse {
   };
   token: string;
 }
+export interface TokenPayload {
+  id: string;
+}
