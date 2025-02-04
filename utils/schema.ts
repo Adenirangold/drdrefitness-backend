@@ -54,6 +54,11 @@ export const memberSchema = z.object({
   currentSubscription: currentSubscriptionSchema,
 });
 
+export const loginSchema = memberSchema.pick({
+  email: true,
+  password: true,
+});
+
 export const planSchema = z.object({
   name: z.string().min(2).max(50),
   gymLocation: z.string().min(2).max(50),

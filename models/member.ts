@@ -26,7 +26,6 @@ const memberSchema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false,
     },
     phoneNumber: {
       type: String,
@@ -154,12 +153,12 @@ memberSchema.pre("save", async function (next) {
   }
 });
 
-memberSchema.set("toJSON", {
-  transform: function (doc, ret, options) {
-    delete ret.password;
-    return ret;
-  },
-});
+// memberSchema.set("toJSON", {
+//   transform: function (doc, ret, options) {
+//     delete ret.password;
+//     return ret;
+//   },
+// });
 
 memberSchema.pre("save", function (next) {
   if (this.isModified("currentSubscription")) {
