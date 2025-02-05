@@ -48,7 +48,7 @@ export const memberSchema = z.object({
   address: addressSchema,
   emergencyContact: emergencyContactSchema,
   healthInfo: healthInfoSchema.optional(),
-  role: z.enum(["user", "admin", "coach", "director"]).default("user"),
+  role: z.enum(["user", "admin", "director"]).default("user"),
   adminlocation: z.string().optional(),
   isActive: z.boolean().default(true),
   currentSubscription: currentSubscriptionSchema,

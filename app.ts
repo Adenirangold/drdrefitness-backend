@@ -5,6 +5,9 @@ import cors from "cors";
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
 import planRoute from "./routes/planRoute";
+import Jwt from "jsonwebtoken";
+import autheticateMember from "./middleware/authentication";
+import { memberSchema } from "./utils/schema";
 
 dotenv.config();
 const app = express();
@@ -20,8 +23,8 @@ app.use(
 );
 app.use(express.json());
 
-app.use("/api/members", memberRoute);
-app.use("/api/plans", planRoute);
+app.use("/api/member", memberRoute);
+app.use("/api/plan", planRoute);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   err.statusCode = err.statusCode || 500;

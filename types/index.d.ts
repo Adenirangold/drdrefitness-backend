@@ -14,3 +14,4 @@ export interface AuthResponse {
 export interface TokenPayload {
   id: string;
 }
+export type Role = z.infer<typeof memberSchema>["role"];
