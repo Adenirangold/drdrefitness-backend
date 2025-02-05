@@ -31,6 +31,12 @@ const autheticateMember = (requiredRole: Role) => {
         return next(new AppError("Invalid Token", 401));
       }
       const decodedMember = await Member.findById(decodedToken.id);
+      if (!decodedMember) {
+        return next(new AppError("Member does not exist", 404));
+      }
+
+      decodedMember.password = "";
+
       console.log(decodedMember);
       const role = decodedMember?.role!;
       if (!hasAccess(role, requiredRole)) {

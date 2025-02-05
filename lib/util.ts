@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { Response } from "express";
 import { Types } from "mongoose";
 import jwt, { SignOptions } from "jsonwebtoken";
-import { AuthResponse, TokenPayload } from "../types";
+import { AuthResponse, TokenPayload, UserInput } from "../types";
 
 dotenv.config();
 

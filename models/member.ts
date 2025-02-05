@@ -1,12 +1,16 @@
 import mongoose from "mongoose";
 import { SubscriptionData, UserInput } from "../types";
-import bcrypt from "bcryptjs";
 import { hashPassword } from "../lib/util";
 
 const Schema = mongoose.Schema;
 
 const memberSchema = new Schema(
   {
+    regNumber: {
+      type: String,
+      unique: true,
+      required: true,
+    },
     firstName: {
       type: String,
       required: true,

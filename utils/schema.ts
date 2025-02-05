@@ -37,6 +37,7 @@ const currentSubscriptionSchema = z.object({
 });
 
 export const memberSchema = z.object({
+  regNumber: z.string().min(2).max(50),
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
