@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import Member from "../models/member";
 import { memberSchema } from "../utils/schema";
 import { Role } from "../types";
+import { Request } from "express-serve-static-core";
 
 const hasAccess = (userRole: Role, requiredRole: Role) => {
   const rolesHierarchy = memberSchema.shape.role._def.innerType._def.values;
@@ -36,7 +37,7 @@ const autheticateMember = (requiredRole: Role) => {
         return next(new AppError("Unauthorized", 401));
       }
 
-      //   req.user = decodedMember;
+      req.user = decodedMember;
       next();
     } catch (error) {
       next(new AppError("Unauthorized", 401));

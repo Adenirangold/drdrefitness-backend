@@ -15,3 +15,9 @@ export interface TokenPayload {
   id: string;
 }
 export type Role = z.infer<typeof memberSchema>["role"];
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: RequestUser;
+  }
+}
