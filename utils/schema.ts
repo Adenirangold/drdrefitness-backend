@@ -36,26 +36,33 @@ const currentSubscriptionSchema = z.object({
   transactionId: z.string().optional(),
 });
 
-export const memberSchema = z.object({
-  regNumber: z.string().min(2).max(50),
-  firstName: z.string().min(2).max(50),
-  lastName: z.string().min(2).max(50),
-  email: z.string().email(),
-  password: z.string().min(6),
-  phoneNumber: z.string().min(11).max(15),
-  dateOfBirth: z.coerce.date(),
-  gender: z.enum(["male", "female"]),
-  profilePicture: z.string().optional(),
-  address: addressSchema,
-  emergencyContact: emergencyContactSchema,
-  healthInfo: healthInfoSchema.optional(),
-  role: z.enum(["user", "admin", "director"]).default("user"),
-  adminlocation: z.string().optional(),
-  isActive: z.boolean().default(true),
-  currentSubscription: currentSubscriptionSchema,
-});
+export const memberSchema = z
+  .object({
+    regNumber: z.string().min(2).max(50),
+    firstName: z.string().min(2).max(50),
+    lastName: z.string().min(2).max(50),
+    email: z.string().email(),
+    password: z.string().min(6),
+    phoneNumber: z.string().min(11).max(15),
+    dateOfBirth: z.coerce.date(),
+    gender: z.enum(["male", "female"]),
+    profilePicture: z.string().optional(),
+    address: addressSchema,
+    emergencyContact: emergencyContactSchema,
+    healthInfo: healthInfoSchema.optional(),
+    role: z.enum(["user", "admin", "director"]).default("user"),
+    isActive: z.boolean().default(true),
+    currentSubscription: currentSubscriptionSchema,
+    adminLocation: z.string().optional().nullable(),
+  })
+  .refine(
+    (data) =>
+      data.role !== "admin" ||
+      (data.adminLocation !== undefined && data.adminLocation !== null),
+    { message: "Admin location is required for admin role" }
+  );
 
-export const loginSchema = memberSchema.pick({
+export const loginSchema = memberSchema.innerType().pick({
   email: true,
   password: true,
 });

@@ -91,10 +91,19 @@ const memberSchema = new Schema(
       enum: ["user", "admin", "director"],
       default: "user",
     },
-    adminlocation: {
+    adminLocation: {
       type: String,
       required: function (this: UserInput) {
         return this?.role === "admin";
+      },
+      validate: {
+        validator: function (this: { role: string; adminLocation?: string }) {
+          return (
+            this.role !== "admin" ||
+            (this.adminLocation !== undefined && this.adminLocation !== null)
+          );
+        },
+        message: "Admin location is required for admin role",
       },
     },
 
@@ -154,6 +163,11 @@ memberSchema.pre("save", async function (next) {
     next();
   } catch (error) {
     next(error as Error);
+  }
+});
+memberSchema.pre("save", function () {
+  if (this.role !== "admin") {
+    this.adminLocation = undefined;
   }
 });
 

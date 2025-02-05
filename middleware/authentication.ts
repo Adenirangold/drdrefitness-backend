@@ -1,4 +1,4 @@
-import { NextFunction } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import AppError from "../utils/AppError";
 import jwt from "jsonwebtoken";
 import Member from "../models/member";
@@ -7,14 +7,15 @@ import { Role } from "../types";
 import { Request } from "express-serve-static-core";
 
 const hasAccess = (userRole: Role, requiredRole: Role) => {
-  const rolesHierarchy = memberSchema.shape.role._def.innerType._def.values;
+  const rolesHierarchy =
+    memberSchema.innerType().shape.role._def.innerType._def.values;
 
   return (
     rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
   );
 };
 
-const autheticateMember = (requiredRole: Role) => {
+const autheticateMember = (requiredRole: Role): RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers["authorization"]?.split(" ")[1];
@@ -37,11 +38,11 @@ const autheticateMember = (requiredRole: Role) => {
 
       decodedMember.password = "";
 
-      console.log(decodedMember);
       const role = decodedMember?.role!;
       if (!hasAccess(role, requiredRole)) {
         return next(new AppError("Unauthorized", 401));
       }
+      console.log(decodedMember);
 
       req.user = decodedMember;
       next();
