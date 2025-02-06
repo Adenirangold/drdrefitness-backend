@@ -3,6 +3,7 @@ import * as authController from "../controller/authController";
 import * as memberController from "../controller/memberController";
 import validateRequest from "../middleware/validation";
 import {
+  forgotPasswordSchema,
   loginSchema,
   memberSchema,
   memberUpdateSchema,
@@ -15,6 +16,16 @@ const router = express.Router();
 router.post("/signup", validateRequest(memberSchema), authController.signup);
 
 router.post("/login", validateRequest(loginSchema), authController.login);
+
+router.post(
+  "/forgot-password",
+  validateRequest(forgotPasswordSchema),
+  authController.forgotPassword
+);
+
+router.patch("/reset-password/:token", authController.resetPassword);
+
+// ///////'//////////////AUTHENTICATED MEMBER ONLY ROUTES////////////////////
 
 router.get("/", autheticateMember("user"), memberController.getMember);
 

@@ -66,6 +66,9 @@ export const loginSchema = memberSchema.innerType().pick({
   email: true,
   password: true,
 });
+export const forgotPasswordSchema = memberSchema.innerType().pick({
+  email: true,
+});
 
 export const memberUpdateSchema = memberSchema.innerType().partial();
 

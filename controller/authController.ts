@@ -64,7 +64,7 @@ export const login = async (
   }
 };
 
-export const forgetPassword = async (
+export const forgotPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
