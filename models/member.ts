@@ -103,7 +103,7 @@ const memberSchema = new Schema(
             (this.adminLocation !== undefined && this.adminLocation !== null)
           );
         },
-        message: "Admin location is required for admin role",
+        message: "adminLocation is required for admin role",
       },
     },
 

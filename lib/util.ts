@@ -16,7 +16,11 @@ export const comparePasswords = async (
   password: string,
   hashedPassword: string
 ) => {
-  return bcrypt.compare(password, hashedPassword);
+  try {
+    return await bcrypt.compare(password, hashedPassword);
+  } catch (error) {
+    throw new Error(`Failed to compare passwords: ${(error as Error).message}`);
+  }
 };
 
 export const getJWTToken = (id: string): string => {

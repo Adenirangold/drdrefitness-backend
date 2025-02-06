@@ -42,7 +42,7 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
       if (!hasAccess(role, requiredRole)) {
         return next(new AppError("Unauthorized", 401));
       }
-      console.log(decodedMember);
+      // console.log(decodedMember);
 
       req.user = decodedMember;
       next();
