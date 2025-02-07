@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { Response } from "express";
 import { Types } from "mongoose";
 import jwt, { SignOptions } from "jsonwebtoken";
+import crypto from "crypto";
 import { AuthResponse, TokenPayload, UserInput } from "../types";
 
 dotenv.config();
@@ -89,4 +90,14 @@ export const verifyToken = (token: string): TokenPayload | null => {
   } catch (error) {
     return null;
   }
+};
+
+export const createHashedToken = () => {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const hashedtoken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  return { hashedtoken, resetToken };
 };

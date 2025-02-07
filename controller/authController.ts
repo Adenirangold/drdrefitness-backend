@@ -1,7 +1,11 @@
 import e, { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
-import { comparePasswords, sendAuthResponse } from "../lib/util";
+import {
+  comparePasswords,
+  createHashedToken,
+  sendAuthResponse,
+} from "../lib/util";
 import sendEmail from "../utils/email";
 
 export const signup = async (
@@ -79,6 +83,35 @@ export const forgotPassword = async (
     if (!existingMember) {
       return next(new AppError("This user does not exist", 401));
     }
+    const { resetToken, hashedtoken } = createHashedToken();
+    const updatedMember = await Member.findByIdAndUpdate(existingMember._id, {
+      resetPasswordToken: hashedtoken,
+      resetPasswordExpires: Date.now() + 10 * 60 * 1000,
+    });
+
+    const result = sendEmail({
+      to: "adeniranbayogold@gmail.com",
+      subject: "Reset Your Drdrefitness Account Password",
+      text: `Hello ${existingMember.firstName},
+
+We received a request to reset your password. If you didn't request this, please ignore this email. Otherwise, click the link below to reset your password:
+
+(http://localhost:3000/reset-password/${resetToken})
+
+This link will expire in 10 minute for security reasons. After that, you will need to request another reset.
+
+If you have any questions or need further assistance, feel free to reply to this email.
+
+Thank you.`,
+    });
+
+    if (!result) {
+      return next(new AppError("Error sending reset token to email", 500));
+    }
+    res.status(200).json({
+      status: "success",
+      message: `Reset token sent `,
+    });
   } catch (error) {
     next(new AppError("Error occured in resetting password", 500));
   }
@@ -90,15 +123,6 @@ export const resetPassword = async (
   next: NextFunction
 ) => {
   try {
-    sendEmail({
-      to: "adeniranbayogold@gmail.com",
-      subject: "Reset Password",
-      text: "Reset Password",
-    });
-    res.status(200).json({
-      status: "success",
-      message: "Reset password link sent to email",
-    });
   } catch (error) {
     next(new AppError("Error occured in resetting password", 500));
   }
