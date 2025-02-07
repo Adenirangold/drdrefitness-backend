@@ -68,7 +68,20 @@ export const forgotPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return next(new AppError("Please provide email", 400));
+    }
+    const existingMember = await Member.findOne({ email });
+    if (!existingMember) {
+      return next(new AppError("This user does not exist", 401));
+    }
+  } catch (error) {
+    next(new AppError("Error occured in resetting password", 500));
+  }
+};
 
 export const resetPassword = async (
   req: Request,
