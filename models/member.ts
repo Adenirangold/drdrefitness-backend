@@ -151,6 +151,8 @@ const memberSchema = new Schema(
         },
       },
     ],
+    passwordResetToken: String,
+    passwordExpiredAt: Date,
   },
   { timestamps: true }
 );

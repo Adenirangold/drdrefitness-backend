@@ -2,6 +2,7 @@ import e, { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
 import { comparePasswords, sendAuthResponse } from "../lib/util";
+import sendEmail from "../utils/email";
 
 export const signup = async (
   req: Request,
@@ -87,4 +88,18 @@ export const resetPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  try {
+    sendEmail({
+      to: "adeniranbayogold@gmail.com",
+      subject: "Reset Password",
+      text: "Reset Password",
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Reset password link sent to email",
+    });
+  } catch (error) {
+    next(new AppError("Error occured in resetting password", 500));
+  }
+};

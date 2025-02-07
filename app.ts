@@ -5,9 +5,6 @@ import cors from "cors";
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
 import planRoute from "./routes/planRoute";
-import Jwt from "jsonwebtoken";
-import autheticateMember from "./middleware/authentication";
-import { memberSchema } from "./utils/schema";
 
 dotenv.config();
 const app = express();

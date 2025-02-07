@@ -43,4 +43,10 @@ router.patch(
   memberController.updateMemberPassword
 );
 
+router.get(
+  "/reset-password",
+  autheticateMember("user"),
+  authController.resetPassword
+);
+
 export default router;
