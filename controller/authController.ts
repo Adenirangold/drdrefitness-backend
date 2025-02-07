@@ -84,9 +84,10 @@ export const forgotPassword = async (
       return next(new AppError("This user does not exist", 401));
     }
     const { resetToken, hashedtoken } = createHashedToken();
+
     const updatedMember = await Member.findByIdAndUpdate(existingMember._id, {
-      resetPasswordToken: hashedtoken,
-      resetPasswordExpires: Date.now() + 10 * 60 * 1000,
+      passwordResetToken: hashedtoken,
+      passwordExpiredAt: Date.now() + 10 * 60 * 1000,
     });
 
     const result = sendEmail({
@@ -94,15 +95,15 @@ export const forgotPassword = async (
       subject: "Reset Your Drdrefitness Account Password",
       text: `Hello ${existingMember.firstName},
 
-We received a request to reset your password. If you didn't request this, please ignore this email. Otherwise, click the link below to reset your password:
+    We received a request to reset your password. If you didn't request this, please ignore this email. Otherwise, click the link below to reset your password:
 
-(http://localhost:3000/reset-password/${resetToken})
+    (http://localhost:3000/reset-password/${resetToken})
 
-This link will expire in 10 minute for security reasons. After that, you will need to request another reset.
+    This link will expire in 10 minute for security reasons. After that, you will need to request another reset.
 
-If you have any questions or need further assistance, feel free to reply to this email.
+    If you have any questions or need further assistance, feel free to reply to this email.
 
-Thank you.`,
+    Thank you.`,
     });
 
     if (!result) {
