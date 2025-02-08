@@ -1,5 +1,9 @@
 import mailgun from "mailgun.js";
 import formData from "form-data";
+import {
+  generateResetPasswordEmail,
+  generateWelcomeEmail,
+} from "./emailTemplate";
 
 const mg = new mailgun(formData).client({
   username: "api",
@@ -28,4 +32,20 @@ const sendEmail = async ({
     throw error;
   }
 };
+
+export const sendResetPasswordEmail = async (
+  to: string,
+  name: string,
+  resetToken: string
+) => {
+  const { subject, text } = generateResetPasswordEmail(name, resetToken);
+  return sendEmail({ to, subject, text });
+};
+
+// Function to send a welcome email
+export const sendWelcomeEmail = async (to: string, name: string) => {
+  const { subject, text } = generateWelcomeEmail(name);
+  return sendEmail({ to, subject, text });
+};
+
 export default sendEmail;

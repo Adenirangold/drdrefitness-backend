@@ -6,7 +6,10 @@ import {
   createHashedToken,
   sendAuthResponse,
 } from "../lib/util";
-import sendEmail from "../utils/email";
+import sendEmail, {
+  sendResetPasswordEmail,
+  sendWelcomeEmail,
+} from "../utils/email";
 
 export const signup = async (
   req: Request,
@@ -30,6 +33,11 @@ export const signup = async (
     if (!savedMember) {
       return next(new AppError("Error creating new member", 500));
     }
+
+    const result = await sendWelcomeEmail(
+      "adeniranbayogold@gmail.com",
+      `${savedMember.firstName}${" "}${savedMember.lastName}`
+    );
 
     sendAuthResponse(res, savedMember._id, savedMember.email);
   } catch (error) {
@@ -90,21 +98,11 @@ export const forgotPassword = async (
       passwordExpiredAt: Date.now() + 10 * 60 * 1000,
     });
 
-    const result = sendEmail({
-      to: "adeniranbayogold@gmail.com",
-      subject: "Reset Your Drdrefitness Account Password",
-      text: `Hello ${existingMember.firstName},
-
-    We received a request to reset your password. If you didn't request this, please ignore this email. Otherwise, click the link below to reset your password:
-
-    (http://localhost:3000/reset-password/${resetToken})
-
-    This link will expire in 10 minute for security reasons. After that, you will need to request another reset.
-
-    If you have any questions or need further assistance, feel free to reply to this email.
-
-    Thank you.`,
-    });
+    const result = await sendResetPasswordEmail(
+      "adeniranbayogold@gmail.com",
+      ` ${existingMember.firstName}${" "}${existingMember.lastName}`,
+      resetToken
+    );
 
     if (!result) {
       return next(new AppError("Error sending reset token to email", 500));
