@@ -88,6 +88,16 @@ export const passwordUpdateSchema = memberSchema
     path: ["confirmPassword"],
   });
 
+export const passwordresetSchema = z
+  .object({
+    newPassword: z.string().min(6),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 export const planSchema = z.object({
   name: z.string().min(2).max(50),
   gymLocation: z.string().min(2).max(50),

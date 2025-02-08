@@ -7,6 +7,7 @@ import {
   loginSchema,
   memberSchema,
   memberUpdateSchema,
+  passwordresetSchema,
   passwordUpdateSchema,
 } from "../utils/schema";
 import autheticateMember from "../middleware/authentication";
@@ -23,7 +24,11 @@ router.post(
   authController.forgotPassword
 );
 
-router.patch("/reset-password/:token", authController.resetPassword);
+router.patch(
+  "/reset-password/:token",
+  validateRequest(passwordresetSchema),
+  authController.resetPassword
+);
 
 // ///////'//////////////AUTHENTICATED MEMBER ONLY ROUTES////////////////////
 

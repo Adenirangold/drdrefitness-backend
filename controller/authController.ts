@@ -1,9 +1,11 @@
 import e, { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
+import crypto from "crypto";
 import {
   comparePasswords,
   createHashedToken,
+  hashPassword,
   sendAuthResponse,
 } from "../lib/util";
 import sendEmail, {
@@ -122,7 +124,37 @@ export const resetPassword = async (
   next: NextFunction
 ) => {
   try {
+    const token = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+
+    const hashedPassword = await hashPassword(req.body.newPassword);
+
+    const member = await Member.findOneAndUpdate(
+      {
+        passwordResetToken: token,
+        passwordExpiredAt: { $gt: Date.now() },
+      },
+      {
+        $set: {
+          password: hashedPassword,
+          passwordResetToken: null,
+          passwordExpiredAt: null,
+        },
+      }
+    );
+    if (!member) {
+      return next(new AppError("Token is invalid or has expired", 400));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: `Reset password successfull`,
+    });
   } catch (error) {
+    console.log(error);
+
     next(new AppError("Error occured in resetting password", 500));
   }
 };
