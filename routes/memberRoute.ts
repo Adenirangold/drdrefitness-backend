@@ -47,5 +47,6 @@ router.patch(
   autheticateMember("member"),
   memberController.updateMemberPassword
 );
+console.log("heyyy");
 
 export default router;
