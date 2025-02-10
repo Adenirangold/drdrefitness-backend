@@ -32,19 +32,19 @@ router.patch(
 
 // ///////'//////////////AUTHENTICATED MEMBER ONLY ROUTES////////////////////
 
-router.get("/", autheticateMember("user"), memberController.getMember);
+router.get("/", autheticateMember("member"), memberController.getMember);
 
 router.patch(
   "/update",
   validateRequest(memberUpdateSchema),
-  autheticateMember("user"),
+  autheticateMember("member"),
   memberController.updateMember
 );
 
 router.patch(
   "/update-password",
   validateRequest(passwordUpdateSchema),
-  autheticateMember("user"),
+  autheticateMember("member"),
   memberController.updateMemberPassword
 );
 

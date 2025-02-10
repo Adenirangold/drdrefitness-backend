@@ -50,7 +50,7 @@ export const memberSchema = z
     address: addressSchema,
     emergencyContact: emergencyContactSchema,
     healthInfo: healthInfoSchema.optional(),
-    role: z.enum(["user", "admin", "director"]).default("user"),
+    role: z.enum(["member", "admin", "director"]).default("member"),
     isActive: z.boolean().default(true),
     currentSubscription: currentSubscriptionSchema,
     adminLocation: z.string().optional().nullable(),
