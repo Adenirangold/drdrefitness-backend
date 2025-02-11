@@ -30,7 +30,7 @@ router.patch(
   authController.resetPassword
 );
 
-// ///////'//////////////AUTHENTICATED MEMBER ONLY ROUTES////////////////////
+////// //////////////'//////////////AUTHENTICATED MEMBER ONLY ROUTES/////////////////////////////////
 
 router.get("/", autheticateMember("member"), memberController.getMember);
 
@@ -47,6 +47,5 @@ router.patch(
   autheticateMember("member"),
   memberController.updateMemberPassword
 );
-console.log("heyyy");
 
 export default router;
