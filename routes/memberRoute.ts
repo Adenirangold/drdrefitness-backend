@@ -14,28 +14,10 @@ import autheticateMember from "../middleware/authentication";
 
 const router = express.Router();
 
-router.post("/signup", validateRequest(memberSchema), authController.signup);
-
-router.post("/login", validateRequest(loginSchema), authController.login);
-
-router.post(
-  "/forgot-password",
-  validateRequest(forgotPasswordSchema),
-  authController.forgotPassword
-);
-
-router.patch(
-  "/reset-password/:token",
-  validateRequest(passwordresetSchema),
-  authController.resetPassword
-);
-
-////// //////////////'//////////////AUTHENTICATED MEMBER ONLY ROUTES/////////////////////////////////
-
 router.get("/", autheticateMember("member"), memberController.getMember);
 
 router.patch(
-  "/update",
+  "/",
   validateRequest(memberUpdateSchema),
   autheticateMember("member"),
   memberController.updateMember

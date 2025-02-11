@@ -25,3 +25,5 @@ router.patch(
   validateRequest(passwordresetSchema),
   authController.resetPassword
 );
+
+export default router;
