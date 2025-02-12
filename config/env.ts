@@ -10,4 +10,5 @@ export const config = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
   MAILGUN_API_KEY: process.env.MAILGUN_API_KEY,
   MAILGUN_DOMAIN: process.env.MAILGUN_DOMAIN,
+  ARCJET_KET: process.env.ARCJET_KET,
 };
