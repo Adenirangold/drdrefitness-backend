@@ -11,7 +11,7 @@ import {
 import sendEmail, {
   sendResetPasswordEmail,
   sendWelcomeEmail,
-} from "../utils/email";
+} from "../config/email";
 
 export const signup = async (
   req: Request,

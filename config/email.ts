@@ -3,7 +3,7 @@ import formData from "form-data";
 import {
   generateResetPasswordEmail,
   generateWelcomeEmail,
-} from "./emailTemplate";
+} from "../utils/emailTemplate";
 
 const mg = new mailgun(formData).client({
   username: "api",

@@ -13,6 +13,7 @@
     "@arcjet/node": "^1.0.0-beta.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
+    "@upstash/workflow": "^0.2.7",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
