@@ -1,24 +1,16 @@
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
-import cors from "cors";
 
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
 import planRoute from "./routes/planRoute";
 import authRoute from "./routes/authRoute";
+import { configureSecurityMiddleware } from "./middleware/security";
 
 dotenv.config();
 const app = express();
+configureSecurityMiddleware(app);
 
-app.use(cors());
-app.use(
-  cors({
-    origin: ["http://localhost:3000", "https://yourdomain.com"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
 app.use(express.json());
 
 app.use("/api/auth", authRoute);
