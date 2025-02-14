@@ -8,9 +8,9 @@ export const createPlan = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.body);
-    const existingPlan = await Plan.find({ planId: req.body.planId });
-    if (!existingPlan) {
+    const existingPlan = await Plan.findOne({ planId: req.body.planId });
+
+    if (existingPlan) {
       return next(new AppError("plan already exist", 409));
     }
 
@@ -18,6 +18,76 @@ export const createPlan = async (
 
     res.status(201).json({ status: "success", message: "plan created" });
   } catch (error) {
+    next(new AppError("Internal server error", 500));
+  }
+};
+export const getAllPlans = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const plans = await Plan.find();
+    if (!plans) {
+      return next(new AppError("No plan exist", 400));
+    }
+    res.status(200).json({
+      status: "success",
+      data: {
+        plans,
+      },
+    });
+  } catch (err) {
+    next(new AppError("Internal server error", 500));
+  }
+};
+
+export const updatePlan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { planId } = req.params;
+
+    const plan = await Plan.findByIdAndUpdate(planId, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!plan) {
+      return next(new AppError("Plan not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Plan updated successfully",
+    });
+  } catch (err) {
+    next(new AppError("Internal server error", 500));
+  }
+};
+
+export const deletePlan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { planId } = req.params;
+
+    // Find and delete the plan
+    const plan = await Plan.findByIdAndDelete(planId);
+
+    if (!plan) {
+      return next(new AppError("Plan not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Plan deleted successfully",
+    });
+  } catch (err) {
     next(new AppError("Internal server error", 500));
   }
 };

@@ -106,3 +106,4 @@ export const planSchema = z.object({
   price: z.coerce.number().positive(),
   duration: z.coerce.number().positive(),
 });
+export const updatePlanSchema = planSchema.omit({ planId: true }).partial();
