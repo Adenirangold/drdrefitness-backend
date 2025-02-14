@@ -6,20 +6,17 @@ const planSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
 
   gymLocation: {
     type: String,
     required: true,
-    trim: true,
   },
 
   gymBranch: {
     type: String,
     required: true,
-    trim: true,
   },
 
   benefits: {

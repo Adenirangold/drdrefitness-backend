@@ -24,7 +24,7 @@ router.patch(
 );
 
 router.patch(
-  "/update-password",
+  "/password",
   validateRequest(passwordUpdateSchema),
   autheticateMember("member"),
   memberController.updateMemberPassword

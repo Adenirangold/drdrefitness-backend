@@ -29,7 +29,6 @@ const currentSubscriptionSchema = z.object({
     .enum(["active", "expired", "suspended", "cancelled"])
     .default("active"),
   startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
   autoRenew: z.boolean().default(false),
   paymentMethod: z.enum(["card", "bank", "cash"]).default("card"),
   paymentStatus: z.enum(["pending", "approved", "declined"]).default("pending"),

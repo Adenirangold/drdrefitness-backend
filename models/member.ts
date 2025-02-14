@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { SubscriptionData, UserInput } from "../types";
-import { hashPassword } from "../lib/util";
+import { calculateEndDate, hashPassword } from "../lib/util";
+import Plan from "./plan";
 
 const Schema = mongoose.Schema;
 
@@ -172,13 +173,28 @@ memberSchema.pre("save", function () {
     this.adminLocation = undefined;
   }
 });
+memberSchema.pre("save", async function (next) {
+  if (this.currentSubscription && this.currentSubscription.plan) {
+    try {
+      const plan = await Plan.findById(this.currentSubscription.plan);
 
-// memberSchema.set("toJSON", {
-//   transform: function (doc, ret, options) {
-//     delete ret.password;
-//     return ret;
-//   },
-// });
+      if (plan && this.currentSubscription.startDate) {
+        const endPlanDate = calculateEndDate(
+          this.currentSubscription.startDate,
+          plan.duration
+        );
+
+        this.currentSubscription.endDate = new Date(endPlanDate);
+      }
+
+      next();
+    } catch (error) {
+      next(error as Error);
+    }
+  } else {
+    next();
+  }
+});
 
 memberSchema.pre("save", function (next) {
   if (this.isModified("currentSubscription")) {
@@ -204,17 +220,6 @@ memberSchema.pre("save", function (next) {
 
   next();
 });
-
-memberSchema.methods.updateSubscription = async function (
-  subscriptionData: SubscriptionData
-) {
-  this.currentSubscription = {
-    ...this.currentSubscription.toObject(),
-    ...subscriptionData,
-  };
-  await this.save();
-  return this;
-};
 
 const Member = mongoose.model("Member", memberSchema);
 export default Member;

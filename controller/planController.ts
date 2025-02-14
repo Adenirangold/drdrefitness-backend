@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-export const createMember = async (
+export const createPlan = async (
   req: Request,
   res: Response,
   next: NextFunction

@@ -101,3 +101,11 @@ export const createHashedToken = () => {
 
   return { hashedtoken, resetToken };
 };
+
+export const calculateEndDate = (startDate: Date, durationInDays: number) => {
+  const start = new Date(startDate);
+
+  start.setDate(start.getDate() + durationInDays);
+
+  return start.toISOString();
+};

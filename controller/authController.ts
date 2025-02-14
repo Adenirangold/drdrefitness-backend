@@ -3,6 +3,7 @@ import AppError from "../utils/AppError";
 import Member from "../models/member";
 import crypto from "crypto";
 import {
+  calculateEndDate,
   comparePasswords,
   createHashedToken,
   hashPassword,
@@ -12,6 +13,7 @@ import sendEmail, {
   sendResetPasswordEmail,
   sendWelcomeEmail,
 } from "../config/email";
+import Plan from "../models/plan";
 
 export const signup = async (
   req: Request,
@@ -28,7 +30,20 @@ export const signup = async (
         )
       );
     }
+
+    const plan = await Plan.findById(req.body.currentSubscription.plan);
+
+    if (!plan) {
+      return next(new AppError("Plan does not exist", 401));
+    }
+    const planStartDate = req.body.currentSubscription.startDate;
+    const planDuration = plan.duration;
+
+    const planEndDate = calculateEndDate(planStartDate, planDuration);
+    console.log(planEndDate);
+
     const newMember = new Member(req.body);
+
     const savedMember = await newMember.save();
     savedMember.password = "";
 
