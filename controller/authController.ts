@@ -36,11 +36,6 @@ export const signup = async (
     if (!plan) {
       return next(new AppError("Plan does not exist", 401));
     }
-    const planStartDate = req.body.currentSubscription.startDate;
-    const planDuration = plan.duration;
-
-    const planEndDate = calculateEndDate(planStartDate, planDuration);
-    console.log(planEndDate);
 
     const newMember = new Member(req.body);
 
