@@ -1,15 +1,7 @@
 import express from "express";
-import * as authController from "../controller/authController";
 import * as memberController from "../controller/memberController";
 import validateRequest from "../middleware/validation";
-import {
-  forgotPasswordSchema,
-  loginSchema,
-  memberSchema,
-  memberUpdateSchema,
-  passwordresetSchema,
-  passwordUpdateSchema,
-} from "../utils/schema";
+import { memberUpdateSchema, passwordUpdateSchema } from "../utils/schema";
 import autheticateMember from "../middleware/authentication";
 
 const router = express.Router();

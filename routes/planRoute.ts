@@ -6,6 +6,7 @@ import {
   createPlan,
   deletePlan,
   getAllPlans,
+  getPlan,
   updatePlan,
 } from "../controller/planController";
 import autheticateMember from "../middleware/authentication";
@@ -19,13 +20,14 @@ router.post(
   createPlan
 );
 router.patch(
-  "/",
+  "/:planId",
   validateRequest(updatePlanSchema),
   autheticateMember("director"),
   updatePlan
 );
 
-router.delete("/", autheticateMember("director"), deletePlan);
+router.delete("/:planId", autheticateMember("director"), deletePlan);
+router.get("/:planId", autheticateMember("director"), getPlan);
 
 router.get("/", getAllPlans);
 

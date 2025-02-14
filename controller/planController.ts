@@ -41,6 +41,30 @@ export const getAllPlans = async (
     next(new AppError("Internal server error", 500));
   }
 };
+export const getPlan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { planId } = req.params;
+
+    const plan = await Plan.findById(planId);
+
+    if (!plan) {
+      return next(new AppError("Plan not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        plan,
+      },
+    });
+  } catch (err) {
+    next(new AppError("Internal server error", 500));
+  }
+};
 
 export const updatePlan = async (
   req: Request,
