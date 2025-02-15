@@ -9,10 +9,7 @@ import {
   hashPassword,
   sendAuthResponse,
 } from "../lib/util";
-import sendEmail, {
-  sendResetPasswordEmail,
-  sendWelcomeEmail,
-} from "../config/email";
+import { sendResetPasswordEmail, sendWelcomeEmail } from "../config/email";
 import Plan from "../models/plan";
 
 export const signup = async (
@@ -21,11 +18,16 @@ export const signup = async (
   next: NextFunction
 ) => {
   try {
-    const prevUser = await Member.findOne({ email: req.body.email });
+    if (req.body.role && req.body.role !== "member") {
+      return next(new AppError("Unauthorised to create an admin account", 403));
+    }
+    const prevUser = await Member.findOne({ email: req.body.email }).select(
+      "email"
+    );
     if (prevUser) {
       return next(
         new AppError(
-          "This user already exists, please use a different email",
+          "Email already registered. Please use a different email address",
           409
         )
       );
@@ -34,7 +36,7 @@ export const signup = async (
     const plan = await Plan.findById(req.body.currentSubscription.plan);
 
     if (!plan) {
-      return next(new AppError("Plan does not exist", 401));
+      return next(new AppError("Invalid subscription plan", 400));
     }
 
     const newMember = new Member(req.body);
@@ -43,7 +45,7 @@ export const signup = async (
     savedMember.password = "";
 
     if (!savedMember) {
-      return next(new AppError("Error creating new member", 500));
+      return next(new AppError("Failed to create member", 500));
     }
 
     const result = await sendWelcomeEmail(

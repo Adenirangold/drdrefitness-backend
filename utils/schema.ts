@@ -35,6 +35,11 @@ const currentSubscriptionSchema = z.object({
   transactionId: z.string().optional(),
 });
 
+const adminLocationSchema = z.object({
+  location: z.string().min(2).max(50),
+  branch: z.string().min(2).max(50),
+});
+
 export const memberSchema = z
   .object({
     regNumber: z.string().min(2).max(50),
@@ -52,7 +57,7 @@ export const memberSchema = z
     role: z.enum(["member", "admin", "director"]).default("member"),
     isActive: z.boolean().default(true),
     currentSubscription: currentSubscriptionSchema,
-    adminLocation: z.string().optional().nullable(),
+    adminLocation: adminLocationSchema.optional().nullable(),
     passwordResetToken: z.string().optional(),
     passwordExpiredAt: z.coerce.date().optional(),
   })

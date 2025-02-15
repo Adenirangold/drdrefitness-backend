@@ -39,6 +39,11 @@ export const updateMember = async (
     if (!req.user) {
       return next(new AppError("Unauthorized", 401));
     }
+    if (req.body.role && req.body.role !== "member") {
+      return next(
+        new AppError("Role cannot be modified through this endpoint", 403)
+      );
+    }
 
     const member = req.user;
 

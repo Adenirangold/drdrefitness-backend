@@ -92,22 +92,54 @@ const memberSchema = new Schema(
       enum: ["member", "admin", "director"],
       default: "member",
     },
+    // adminLocation: {
+    //   type: String,
+    //   required: function (this: UserInput) {
+    //     return this?.role === "admin";
+    //   },
+    //   validate: {
+    //     validator: function (this: { role: string; adminLocation?: string }) {
+    //       return (
+    //         this.role !== "admin" ||
+    //         (this.adminLocation !== undefined && this.adminLocation !== null)
+    //       );
+    //     },
+    //     message: "adminLocation is required for admin role",
+    //   },
+    // },
     adminLocation: {
-      type: String,
+      type: {
+        location: {
+          type: String,
+          minlength: 2,
+          maxlength: 50,
+        },
+        branch: {
+          type: String,
+          minlength: 2,
+          maxlength: 50,
+        },
+      },
       required: function (this: UserInput) {
         return this?.role === "admin";
       },
       validate: {
-        validator: function (this: { role: string; adminLocation?: string }) {
+        validator: function (this: {
+          role: string;
+          adminLocation?: { location: string; branch: string };
+        }) {
           return (
             this.role !== "admin" ||
-            (this.adminLocation !== undefined && this.adminLocation !== null)
+            (this.adminLocation !== undefined &&
+              this.adminLocation !== null &&
+              this.adminLocation.location &&
+              this.adminLocation.branch)
           );
         },
-        message: "adminLocation is required for admin role",
+        message:
+          "adminLocation with valid location and branch is required for admin role",
       },
     },
-
     isActive: {
       type: Boolean,
       default: true,
