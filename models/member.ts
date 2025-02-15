@@ -10,40 +10,40 @@ const memberSchema = new Schema(
     regNumber: {
       type: String,
       unique: true,
-      required: true,
+      // required: true,
     },
     firstName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     lastName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     email: {
       type: String,
-      required: true,
+      // required: true,
       unique: true,
       trim: true,
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
     },
     phoneNumber: {
       type: String,
-      required: true,
+      // required: true,
     },
     dateOfBirth: {
       type: Date,
-      required: true,
+      // required: true,
     },
     gender: {
       type: String,
       enum: ["male", "female"],
-      required: true,
+      // required: true,
     },
     profilePicture: {
       type: String,
@@ -51,15 +51,15 @@ const memberSchema = new Schema(
     address: {
       street: {
         type: String,
-        required: true,
+        // required: true,
       },
       city: {
         type: String,
-        required: true,
+        // required: true,
       },
       state: {
         type: String,
-        required: true,
+        // required: true,
       },
       country: {
         type: String,
@@ -70,15 +70,15 @@ const memberSchema = new Schema(
     emergencyContact: {
       fullName: {
         type: String,
-        required: true,
+        // required: true,
       },
       phoneNumber: {
         type: String,
-        required: true,
+        // required: true,
       },
       relationship: {
         type: String,
-        required: true,
+        // required: true,
       },
     },
     healthInfo: {
@@ -92,21 +92,7 @@ const memberSchema = new Schema(
       enum: ["member", "admin", "director"],
       default: "member",
     },
-    // adminLocation: {
-    //   type: String,
-    //   required: function (this: UserInput) {
-    //     return this?.role === "admin";
-    //   },
-    //   validate: {
-    //     validator: function (this: { role: string; adminLocation?: string }) {
-    //       return (
-    //         this.role !== "admin" ||
-    //         (this.adminLocation !== undefined && this.adminLocation !== null)
-    //       );
-    //     },
-    //     message: "adminLocation is required for admin role",
-    //   },
-    // },
+
     adminLocation: {
       type: {
         location: {
@@ -193,7 +179,7 @@ const memberSchema = new Schema(
 memberSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
-    const hashedPassword = await hashPassword(this.password);
+    const hashedPassword = await hashPassword(this.password!);
     this.password = hashedPassword;
     next();
   } catch (error) {

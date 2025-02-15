@@ -3,7 +3,6 @@ import AppError from "../utils/AppError";
 import Member from "../models/member";
 import crypto from "crypto";
 import {
-  calculateEndDate,
   comparePasswords,
   createHashedToken,
   hashPassword,
@@ -53,7 +52,7 @@ export const signup = async (
       `${savedMember.firstName}${" "}${savedMember.lastName}`
     );
 
-    sendAuthResponse(res, savedMember._id, savedMember.email);
+    sendAuthResponse(res, savedMember._id, savedMember.email!);
   } catch (error) {
     console.log(error);
 
@@ -76,14 +75,14 @@ export const login = async (
       return next(new AppError("This user does not exist", 401));
     }
 
-    const isMatch = await comparePasswords(password, existingMember.password);
+    const isMatch = await comparePasswords(password, existingMember.password!);
     existingMember.password = "";
 
     if (!isMatch) {
       return next(new AppError("Invalid email or password", 401));
     }
 
-    sendAuthResponse(res, existingMember._id, existingMember.email);
+    sendAuthResponse(res, existingMember._id, existingMember.email!);
   } catch (error) {
     console.log(error);
 

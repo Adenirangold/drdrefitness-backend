@@ -100,7 +100,7 @@ export const updateMemberPassword = async (
 
     const isPasswordValid = await comparePasswords(
       password,
-      currentPassword.password
+      currentPassword.password!
     );
 
     if (!isPasswordValid) {
