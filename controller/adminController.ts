@@ -9,6 +9,9 @@ export const createAdmin = async (
   next: NextFunction
 ) => {
   try {
+    if (req.body.role && req.body.role === "director") {
+      return next(new AppError("Unauthorised to create a director", 403));
+    }
     const admin = req.user;
 
     if (!admin) {
@@ -69,10 +72,9 @@ export const getAdminBranchMember = async (
     const gymLocation = req.user.adminLocation.location;
     const gymBranch = req.user.adminLocation.branch;
 
-    const members = await Member.find({
-      "currentSubscription.plan.gymLocation": gymLocation,
-      "currentSubscription.plan.gymBranch": gymBranch,
-    }).populate("currentSubscription.plan");
+    console.log(gymLocation, gymBranch);
+
+    const members = await Member.find();
 
     console.log(members);
 

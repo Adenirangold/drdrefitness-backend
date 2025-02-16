@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { SubscriptionData, UserInput } from "../types";
+import { Role, SubscriptionData, UserInput } from "../types";
 import { calculateEndDate, hashPassword } from "../lib/util";
 import Plan from "./plan";
 
@@ -52,6 +52,13 @@ const memberSchema = new Schema(
       },
       country: {
         type: String,
+        default: function (this: { role: Role }) {
+          if (this.role === "member") {
+            return "Nigeria";
+          }
+
+          return undefined;
+        },
       },
     },
 
@@ -69,8 +76,8 @@ const memberSchema = new Schema(
     healthInfo: {
       height: Number,
       weight: Number,
-      medicalConditions: [String],
-      allergies: [String],
+      medicalConditions: { type: [String], default: undefined },
+      allergies: { type: [String], default: undefined },
     },
     role: {
       type: String,
@@ -113,6 +120,13 @@ const memberSchema = new Schema(
     },
     isActive: {
       type: Boolean,
+      default: function (this: { role: Role }) {
+        if (this.role === "member") {
+          return true;
+        }
+
+        return undefined;
+      },
     },
 
     currentSubscription: {
@@ -123,20 +137,37 @@ const memberSchema = new Schema(
       status: {
         type: String,
         enum: ["active", "expired", "suspended", "cancelled"],
+        default: function (this: { role: Role }) {
+          if (this.role === "member") {
+            return "active";
+          }
+
+          return undefined;
+        },
       },
       startDate: Date,
       endDate: Date,
       autoRenew: {
         type: Boolean,
-        default: false,
-        required: false,
+        default: function (this: { role: Role }) {
+          if (this.role === "member") {
+            return false;
+          }
+
+          return undefined;
+        },
       },
       paymentMethod: String,
       paymentStatus: {
         type: String,
         enum: ["pending", "approved", "declined"],
-        default: "pending",
-        required: false,
+        default: function (this: { role: Role }) {
+          if (this.role === "member") {
+            return "pending";
+          }
+
+          return undefined;
+        },
       },
       transactionId: String,
     },
@@ -201,7 +232,7 @@ memberSchema.pre("save", async function (next) {
 });
 
 memberSchema.pre("save", function (next) {
-  if (this.isModified("currentSubscription")) {
+  if (this.role === "member" && this.isModified("currentSubscription")) {
     const subscription = this.currentSubscription;
 
     if (
