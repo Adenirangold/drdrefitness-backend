@@ -26,7 +26,7 @@ export const getMember = async (
       },
     });
   } catch (error) {
-    next(new AppError("Error fetching member", 500));
+    next(error);
   }
 };
 
@@ -73,7 +73,7 @@ export const updateMember = async (
       },
     });
   } catch (error) {
-    next(new AppError("Error updating member", 500));
+    next(error);
   }
 };
 
@@ -125,6 +125,6 @@ export const updateMemberPassword = async (
       message: "Password updated successfully",
     });
   } catch (error) {
-    next(new AppError("Error updating member password", 500));
+    next(error);
   }
 };

@@ -3,6 +3,10 @@ class AppError extends Error {
   status: string;
   isOperational: boolean;
   validationErrors?: any;
+  code?: number;
+  value?: any;
+  errors?: any;
+  keyValue?: any;
   constructor(message: string, statusCode: number, validationErrors?: any) {
     super(message);
     this.statusCode = statusCode;

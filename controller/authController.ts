@@ -54,9 +54,7 @@ export const signup = async (
 
     sendAuthResponse(res, savedMember._id, savedMember.email!);
   } catch (error) {
-    console.log(error);
-
-    next(new AppError("Error occured in creating new member", 500));
+    next(error);
   }
 };
 
@@ -84,9 +82,7 @@ export const login = async (
 
     sendAuthResponse(res, existingMember._id, existingMember.email!);
   } catch (error) {
-    console.log(error);
-
-    next(new AppError("Error occured logging in member", 500));
+    next(error);
   }
 };
 
@@ -125,7 +121,7 @@ export const forgotPassword = async (
       message: `Reset token sent `,
     });
   } catch (error) {
-    next(new AppError("Error occured in resetting password", 500));
+    next(error);
   }
 };
 
@@ -164,8 +160,6 @@ export const resetPassword = async (
       message: `Reset password successfull`,
     });
   } catch (error) {
-    console.log(error);
-
-    next(new AppError("Error occured in resetting password", 500));
+    next(error);
   }
 };

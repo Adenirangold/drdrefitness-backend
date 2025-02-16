@@ -1,7 +1,7 @@
 import express from "express";
 
 import validateRequest from "../middleware/validation";
-import { memberSchema, planSchema, updatePlanSchema } from "../utils/schema";
+import { adminSchema } from "../utils/schema";
 import * as adminController from "../controller/adminController";
 
 import autheticateMember from "../middleware/authentication";
@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.post(
   "/",
-  validateRequest(memberSchema),
+  validateRequest(adminSchema),
   autheticateMember("director"),
   adminController.createAdmin
 );

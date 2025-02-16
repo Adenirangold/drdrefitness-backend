@@ -18,7 +18,7 @@ export const createPlan = async (
 
     res.status(201).json({ status: "success", message: "plan created" });
   } catch (error) {
-    next(new AppError("Internal server error", 500));
+    next(error);
   }
 };
 export const getAllPlans = async (
@@ -38,7 +38,7 @@ export const getAllPlans = async (
       },
     });
   } catch (err) {
-    next(new AppError("Internal server error", 500));
+    next(err);
   }
 };
 export const getPlan = async (
@@ -62,7 +62,7 @@ export const getPlan = async (
       },
     });
   } catch (err) {
-    next(new AppError("Internal server error", 500));
+    next(err);
   }
 };
 
@@ -88,7 +88,7 @@ export const updatePlan = async (
       message: "Plan updated successfully",
     });
   } catch (err) {
-    next(new AppError("Internal server error", 500));
+    next(err);
   }
 };
 
@@ -112,6 +112,6 @@ export const deletePlan = async (
       message: "Plan deleted successfully",
     });
   } catch (err) {
-    next(new AppError("Internal server error", 500));
+    next(err);
   }
 };

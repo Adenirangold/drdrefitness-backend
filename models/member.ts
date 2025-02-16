@@ -10,40 +10,32 @@ const memberSchema = new Schema(
     regNumber: {
       type: String,
       unique: true,
-      // required: true,
     },
     firstName: {
       type: String,
-      // required: true,
       trim: true,
     },
     lastName: {
       type: String,
-      // required: true,
       trim: true,
     },
     email: {
       type: String,
-      // required: true,
       unique: true,
       trim: true,
     },
     password: {
       type: String,
-      // required: true,
     },
     phoneNumber: {
       type: String,
-      // required: true,
     },
     dateOfBirth: {
       type: Date,
-      // required: true,
     },
     gender: {
       type: String,
       enum: ["male", "female"],
-      // required: true,
     },
     profilePicture: {
       type: String,
@@ -51,34 +43,27 @@ const memberSchema = new Schema(
     address: {
       street: {
         type: String,
-        // required: true,
       },
       city: {
         type: String,
-        // required: true,
       },
       state: {
         type: String,
-        // required: true,
       },
       country: {
         type: String,
-        default: "Nigeria",
       },
     },
 
     emergencyContact: {
       fullName: {
         type: String,
-        // required: true,
       },
       phoneNumber: {
         type: String,
-        // required: true,
       },
       relationship: {
         type: String,
-        // required: true,
       },
     },
     healthInfo: {
@@ -128,7 +113,6 @@ const memberSchema = new Schema(
     },
     isActive: {
       type: Boolean,
-      default: true,
     },
 
     currentSubscription: {
@@ -139,19 +123,20 @@ const memberSchema = new Schema(
       status: {
         type: String,
         enum: ["active", "expired", "suspended", "cancelled"],
-        default: "active",
       },
       startDate: Date,
       endDate: Date,
       autoRenew: {
         type: Boolean,
         default: false,
+        required: false,
       },
       paymentMethod: String,
       paymentStatus: {
         type: String,
         enum: ["pending", "approved", "declined"],
         default: "pending",
+        required: false,
       },
       transactionId: String,
     },
@@ -191,6 +176,7 @@ memberSchema.pre("save", function () {
     this.adminLocation = undefined;
   }
 });
+
 memberSchema.pre("save", async function (next) {
   if (this.currentSubscription && this.currentSubscription.plan) {
     try {

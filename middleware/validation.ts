@@ -24,7 +24,7 @@ const validateRequest = (schema: z.ZodSchema) => {
         return next(appError);
       }
 
-      next(new AppError("Internal server error", 500));
+      next(error);
     }
   };
 };

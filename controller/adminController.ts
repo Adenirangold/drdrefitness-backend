@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
+
 import Member from "../models/member";
-import { sendAuthResponse } from "../lib/util";
 
 export const createAdmin = async (
   req: Request,
@@ -27,10 +27,20 @@ export const createAdmin = async (
       );
     }
 
-    const newAdmin = new Member(req.body);
+    const adminSanitize = {
+      email: req.body.email,
+      regNumber: req.body.regNumber,
+      password: req.body.password,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      role: req.body.role,
+      phoneNumber: req.body.phoneNumber,
+      adminLocation: req.body.adminLocation,
+    };
+
+    const newAdmin = new Member(adminSanitize);
 
     const savedMember = await newAdmin.save();
-    savedMember.password = "";
 
     if (!savedMember) {
       return next(new AppError("Failed to create admin", 500));
@@ -41,7 +51,7 @@ export const createAdmin = async (
       message: "Admin created successfully",
     });
   } catch (err) {
-    next(new AppError("Error occured in creating new member", 500));
+    next(err);
   }
 };
 
@@ -73,6 +83,6 @@ export const getAdminBranchMember = async (
       },
     });
   } catch (err) {
-    next(new AppError("Error occured in creating new member", 500));
+    next(err);
   }
 };
