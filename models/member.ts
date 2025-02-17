@@ -176,7 +176,7 @@ const memberSchema = new Schema(
       {
         plan: {
           type: Schema.Types.ObjectId,
-          ref: "MembershipPlan",
+          ref: "Plan",
         },
         startDate: {
           type: Date,
@@ -186,6 +186,7 @@ const memberSchema = new Schema(
         },
       },
     ],
+
     passwordResetToken: String,
     passwordExpiredAt: Date,
   },
@@ -253,6 +254,12 @@ memberSchema.pre("save", function (next) {
     }
   }
 
+  next();
+});
+memberSchema.pre("save", function (next) {
+  if (this.role !== "member" && this.membershipHistory.length === 0) {
+    (this as any).membershipHistory = undefined;
+  }
   next();
 });
 

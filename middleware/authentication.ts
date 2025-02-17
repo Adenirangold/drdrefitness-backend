@@ -31,7 +31,9 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
       if (!decodedToken) {
         return next(new AppError("Invalid Token", 401));
       }
-      const decodedMember = await Member.findById(decodedToken.id);
+      const decodedMember = await Member.findById(decodedToken.id).populate(
+        "membershipHistory.plan"
+      );
       if (!decodedMember) {
         return next(new AppError("Member does not exist", 404));
       }
@@ -44,6 +46,7 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
       }
 
       req.user = decodedMember;
+
       next();
     } catch (error) {
       next(error);
