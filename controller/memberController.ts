@@ -58,6 +58,14 @@ export const updateMember = async (
         )
       );
     }
+    if (req.body.currentSubscription) {
+      return next(
+        new AppError(
+          "Updating subscription cant be done on this end-point",
+          401
+        )
+      );
+    }
     const updatedMember = await Member.findByIdAndUpdate(member._id, req.body, {
       new: true,
       runValidators: true,

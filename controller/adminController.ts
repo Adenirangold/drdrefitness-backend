@@ -72,11 +72,27 @@ export const getAdminBranchMember = async (
     const gymLocation = req.user.adminLocation.location;
     const gymBranch = req.user.adminLocation.branch;
 
-    console.log(gymLocation, gymBranch);
-
-    const members = await Member.find();
-
-    console.log(members);
+    const members = await Member.aggregate([
+      {
+        $lookup: {
+          from: "plans",
+          localField: "currentSubscription.plan",
+          foreignField: "_id",
+          as: "planDetails",
+        },
+      },
+      {
+        $match: {
+          "planDetails.gymLocation": gymLocation,
+          "planDetails.gymBranch": gymBranch,
+        },
+      },
+      {
+        $project: {
+          planDetails: 0,
+        },
+      },
+    ]);
 
     res.status(200).json({
       status: "success",

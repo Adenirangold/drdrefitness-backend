@@ -1,4 +1,4 @@
-import e, { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
 import crypto from "crypto";
@@ -37,6 +37,8 @@ export const signup = async (
     if (!plan) {
       return next(new AppError("Invalid subscription plan", 400));
     }
+
+    // //////payment///////
 
     const newMember = new Member(req.body);
 

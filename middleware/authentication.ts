@@ -35,7 +35,7 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
         "membershipHistory.plan"
       );
       if (!decodedMember) {
-        return next(new AppError("Member does not exist", 404));
+        return next(new AppError("Member with token not found", 404));
       }
 
       decodedMember.password = "";
