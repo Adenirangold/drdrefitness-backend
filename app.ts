@@ -7,21 +7,26 @@ import planRoute from "./routes/planRoute";
 import authRoute from "./routes/authRoute";
 import subscriptionRoute from "./routes/subscriptionRoute";
 import adminRoute from "./routes/adminRoute";
+import paystackRoute from "./routes/paystackRoute";
 import workflowRoute from "./routes/workflowRoute";
 import { configureSecurityMiddleware } from "./middleware/security";
 import errorHandler from "./middleware/errorHandler";
+import bodyParser from "body-parser";
 
 dotenv.config();
 const app = express();
 configureSecurityMiddleware(app);
 
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/api/auth", authRoute);
 app.use("/api/members", memberRoute);
 app.use("/api/plans", planRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/subscription", subscriptionRoute);
+app.use("/api/paystack", paystackRoute);
 app.use("/api/workflow", workflowRoute);
 
 app.use(errorHandler);
