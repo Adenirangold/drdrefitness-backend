@@ -21,7 +21,7 @@ const healthInfoSchema = z.object({
   allergies: z.array(z.string()).optional(),
 });
 
-const currentSubscriptionSchema = z.object({
+export const currentSubscriptionSchema = z.object({
   plan: z
     .string()
     .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
