@@ -8,7 +8,8 @@ export const initializePayment = async (
   next: NextFunction
 ) => {
   try {
-    const { email, amount, metadata } = req.body;
+    const { email, amount, metadata, phone, lastName, firstName } = req.body;
+    const extendedMetadata = { ...metadata, phone, lastName, firstName };
 
     if (!email || !amount) {
       next(new AppError("Email and amount are required", 400));
@@ -17,18 +18,18 @@ export const initializePayment = async (
     // Initialize transaction
     const response = await paystack.post("/transaction/initialize", {
       email,
+
       amount: amount,
       callback_url: `${
         req.body.callback_url || process.env.FRONTEND_URL + "/payment-callback"
       }`,
-      metadata,
+      metadata: extendedMetadata,
     });
 
     if (!response) {
       return next(new AppError("Payment initialization failed", 400));
     }
 
-    // Return authorization URL and reference to client
     res.status(200).json({
       status: "success",
       message: "Payment initialized",
