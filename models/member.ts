@@ -122,7 +122,18 @@ const memberSchema = new Schema(
       type: Boolean,
       default: function (this: { role: Role }) {
         if (this.role === "member") {
-          return true;
+          return false;
+        }
+
+        return undefined;
+      },
+    },
+    status: {
+      type: String,
+      enum: ["active", "expired", "suspended", "cancelled"],
+      default: function (this: { role: Role }) {
+        if (this.role === "member") {
+          return "active";
         }
 
         return undefined;
@@ -134,17 +145,7 @@ const memberSchema = new Schema(
         type: Schema.Types.ObjectId,
         ref: "Plan",
       },
-      status: {
-        type: String,
-        enum: ["active", "expired", "suspended", "cancelled"],
-        default: function (this: { role: Role }) {
-          if (this.role === "member") {
-            return "active";
-          }
 
-          return undefined;
-        },
-      },
       startDate: Date,
       endDate: Date,
       autoRenew: {
@@ -169,7 +170,7 @@ const memberSchema = new Schema(
           return undefined;
         },
       },
-      transactionId: String,
+      transactionReference: String,
     },
 
     membershipHistory: [

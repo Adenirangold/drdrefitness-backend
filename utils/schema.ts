@@ -25,14 +25,9 @@ export const currentSubscriptionSchema = z.object({
   plan: z
     .string()
     .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
-  status: z
-    .enum(["active", "expired", "suspended", "cancelled"])
-    .default("active"),
+
   startDate: z.coerce.date(),
   autoRenew: z.boolean().default(false),
-  paymentMethod: z.enum(["card", "bank", "cash"]).default("card"),
-  paymentStatus: z.enum(["pending", "approved", "declined"]).default("pending"),
-  transactionId: z.string().optional(),
 });
 
 const adminLocationSchema = z.object({
@@ -55,7 +50,7 @@ export const memberSchema = z
     emergencyContact: emergencyContactSchema,
     healthInfo: healthInfoSchema.optional(),
     role: z.enum(["member", "admin", "director"]).default("member"),
-    isActive: z.boolean().default(true),
+    isActive: z.boolean().default(false),
     currentSubscription: currentSubscriptionSchema,
     adminLocation: adminLocationSchema.optional().nullable(),
     passwordResetToken: z.string().optional(),

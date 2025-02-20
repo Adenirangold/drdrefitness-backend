@@ -21,3 +21,18 @@ declare module "express-serve-static-core" {
     user?: RequestUser;
   }
 }
+
+export interface MetaData {
+  firstName: string;
+  lastName: string;
+  phoneNumber: number;
+}
+export interface PaystackResponse {
+  status: boolean;
+  message: string;
+  data: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
+  };
+}

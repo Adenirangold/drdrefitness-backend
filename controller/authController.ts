@@ -10,6 +10,10 @@ import {
 } from "../lib/util";
 import { sendResetPasswordEmail, sendWelcomeEmail } from "../config/email";
 import Plan from "../models/plan";
+import {
+  paystackInitializePayment,
+  paystackVerifyPayment,
+} from "../config/paystack";
 
 export const signup = async (
   req: Request,
@@ -38,9 +42,25 @@ export const signup = async (
       return next(new AppError("Invalid subscription plan", 400));
     }
 
-    // //////payment///////
+    const paymentResponse = await paystackInitializePayment(
+      req.body.email,
+      plan.price,
+      {
+        phoneNumber: req.body.phoneNumber,
+        lastName: req.body.lastName,
+        firstName: req.body.firstName,
+      }
+    );
 
-    const newMember = new Member(req.body);
+    const newMember = new Member(
+      new Member({
+        ...req.body,
+        currentSubscription: {
+          ...req.body.currentSubscription,
+          transactionReference: paymentResponse.data.reference,
+        },
+      })
+    );
 
     const savedMember = await newMember.save();
     savedMember.password = "";
@@ -54,7 +74,54 @@ export const signup = async (
       `${savedMember.firstName}${" "}${savedMember.lastName}`
     );
 
-    sendAuthResponse(res, savedMember._id, savedMember.email!);
+    res.status(200).json({
+      status: "success",
+      data: {
+        authorizationUrl: paymentResponse.data.authorization_url,
+        reference: paymentResponse.data.reference,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyPaymentAndActivate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { reference } = req.body;
+
+    const verificationResponse = await paystackVerifyPayment(reference);
+
+    if (!verificationResponse.status) {
+      return next(new AppError("Payment verification failed", 400));
+    }
+
+    // Find and activate member
+    const member = await Member.findOneAndUpdate(
+      { paymentReference: reference },
+      {
+        isActive: true,
+        paymentVerified: true,
+        paymentVerifiedAt: new Date(),
+      },
+      { new: true }
+    );
+
+    if (!member) {
+      return next(new AppError("Member not found", 404));
+    }
+
+    // Send welcome email
+    const result = await sendWelcomeEmail(
+      "adeniranbayogold@gmail.com",
+      `${member.firstName}${" "}${member.lastName}`
+    );
+
+    sendAuthResponse(res, member._id, member.email!);
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,7 @@
-import paystack from "../config/paystack";
+import {
+  paystackInitializePayment,
+  paystackVerifyPayment,
+} from "../config/paystack";
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/AppError";
 
@@ -8,23 +11,15 @@ export const initializePayment = async (
   next: NextFunction
 ) => {
   try {
-    const { email, amount, metadata, phone, lastName, firstName } = req.body;
-    const extendedMetadata = { ...metadata, phone, lastName, firstName };
+    const { email, amount, phoneNumber, lastName, firstName } = req.body;
+    const metadata = { phoneNumber, lastName, firstName };
 
     if (!email || !amount) {
       next(new AppError("Email and amount are required", 400));
     }
 
     // Initialize transaction
-    const response = await paystack.post("/transaction/initialize", {
-      email,
-
-      amount: amount,
-      callback_url: `${
-        req.body.callback_url || process.env.FRONTEND_URL + "/payment-callback"
-      }`,
-      metadata: extendedMetadata,
-    });
+    const response = await paystackInitializePayment(email, amount, metadata);
 
     if (!response) {
       return next(new AppError("Payment initialization failed", 400));
@@ -56,21 +51,24 @@ export const verifyPayment = async (
   }
 
   try {
-    // Verify the transaction
-    const response = await paystack.get(`/transaction/verify/${reference}`);
-    const { status, gateway_response, amount, customer, metadata } =
-      response.data.data;
+    const {
+      status,
+      gateway_response,
+      amount,
+      customer,
+      metadata,
+      transaction_date,
+    } = await paystackVerifyPayment(reference);
 
-    // Return transaction details to client
     res.json({
-      success: true,
+      status,
       data: {
         status,
         message: gateway_response,
         amount: amount / 100,
         customer,
         metadata,
-        transaction_date: response.data.data.transaction_date,
+        transaction_date,
         reference,
       },
     });
