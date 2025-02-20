@@ -4,6 +4,9 @@ import {
 } from "../config/paystack";
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/AppError";
+import Member from "../models/member";
+import { sendWelcomeEmail } from "../config/email";
+import crypto from "crypto";
 
 export const initializePayment = async (
   req: Request,
@@ -58,6 +61,7 @@ export const verifyPayment = async (
       customer,
       metadata,
       transaction_date,
+      payment_type,
     } = await paystackVerifyPayment(reference);
 
     res.json({
@@ -65,14 +69,77 @@ export const verifyPayment = async (
       data: {
         status,
         message: gateway_response,
-        amount: amount / 100,
+        amount: amount * 100,
         customer,
         metadata,
         transaction_date,
         reference,
+        payment_type,
       },
     });
   } catch (error) {
     next(new AppError("Payment initialization failed", 500));
+  }
+};
+
+export const handlePaystackWebhook = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const hash = crypto
+      .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!)
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+
+    if (hash !== req.headers["x-paystack-signature"]) {
+      return next(new AppError("Invalid signature", 400));
+    }
+
+    const event = req.body;
+
+    // Handle different webhook events
+    switch (event.event) {
+      case "charge.success":
+        const { reference, status, payment_type, customer } = event.data;
+
+        const member = await Member.findOneAndUpdate(
+          { "currentSubscription.transactionReference": reference },
+          {
+            isActive: status === "success",
+            currentSubscription: {
+              paymentMethod: payment_type || "card",
+              paymentStatus: status === "success" ? "approved" : "declined",
+              lastPaymentDate: new Date(),
+            },
+          },
+          { new: true }
+        );
+
+        if (member) {
+          await sendWelcomeEmail(
+            customer.email,
+            `${member.firstName}${" "}${member.lastName}`
+          );
+        }
+        break;
+
+      case "charge.failed":
+        await Member.findOneAndUpdate(
+          { "currentSubscription.transactionReference": event.data.reference },
+          {
+            "currentSubscription.paymentStatus": "failed",
+            isActive: false,
+          }
+        );
+        break;
+
+      // Add other event cases as needed
+    }
+
+    res.status(200).json({ status: "success" });
+  } catch (error) {
+    next(error);
   }
 };

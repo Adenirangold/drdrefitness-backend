@@ -166,7 +166,6 @@ const memberSchema = new Schema(
           if (this.role === "member") {
             return "pending";
           }
-
           return undefined;
         },
       },

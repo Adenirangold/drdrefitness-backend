@@ -103,7 +103,7 @@ export const verifyPaymentAndActivate = async (
       {
         isActive: true,
         currentSubscription: {
-          paymentMethod: verificationResponse.payment_type,
+          paymentMethod: verificationResponse.payment_type || "card",
           paymentStatus:
             verificationResponse.status === "success" ? "approved" : "declined",
         },
