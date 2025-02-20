@@ -69,11 +69,6 @@ export const signup = async (
       return next(new AppError("Failed to create member", 500));
     }
 
-    const result = await sendWelcomeEmail(
-      "adeniranbayogold@gmail.com",
-      `${savedMember.firstName}${" "}${savedMember.lastName}`
-    );
-
     res.status(200).json({
       status: "success",
       data: {
@@ -92,21 +87,26 @@ export const verifyPaymentAndActivate = async (
   next: NextFunction
 ) => {
   try {
-    const { reference } = req.body;
+    const { reference } = req.params;
 
     const verificationResponse = await paystackVerifyPayment(reference);
 
-    if (!verificationResponse.status) {
+    if (
+      !verificationResponse.status ||
+      verificationResponse.status !== "success"
+    ) {
       return next(new AppError("Payment verification failed", 400));
     }
 
-    // Find and activate member
     const member = await Member.findOneAndUpdate(
       { paymentReference: reference },
       {
         isActive: true,
-        paymentVerified: true,
-        paymentVerifiedAt: new Date(),
+        currentSubscription: {
+          paymentMethod: verificationResponse.payment_type,
+          paymentStatus:
+            verificationResponse.status === "success" ? "approved" : "declined",
+        },
       },
       { new: true }
     );
@@ -115,8 +115,7 @@ export const verifyPaymentAndActivate = async (
       return next(new AppError("Member not found", 404));
     }
 
-    // Send welcome email
-    const result = await sendWelcomeEmail(
+    await sendWelcomeEmail(
       "adeniranbayogold@gmail.com",
       `${member.firstName}${" "}${member.lastName}`
     );

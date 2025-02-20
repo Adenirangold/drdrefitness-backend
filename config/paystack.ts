@@ -38,6 +38,7 @@ export const paystackVerifyPayment = async (reference: string) => {
       customer,
       metadata,
       transaction_date,
+      payment_type,
     } = response.data.data;
     return {
       status,
@@ -46,6 +47,7 @@ export const paystackVerifyPayment = async (reference: string) => {
       customer,
       metadata,
       transaction_date,
+      payment_type,
     };
   } catch (err) {
     throw new AppError("Payment initialization failed", 500);

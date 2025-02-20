@@ -12,6 +12,8 @@ const router = express.Router();
 
 router.post("/signup", validateRequest(memberSchema), authController.signup);
 
+router.post("/verify-payment", authController.verifyPaymentAndActivate);
+
 router.post("/login", validateRequest(loginSchema), authController.login);
 
 router.post(
