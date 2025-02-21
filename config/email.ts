@@ -14,10 +14,12 @@ const sendEmail = async ({
   to,
   subject,
   text,
+  html,
 }: {
   to: string;
   subject: string;
   text: string;
+  html: string;
 }) => {
   try {
     const result = await mg.messages.create(process.env.MAILGUN_DOMAIN!, {
@@ -25,6 +27,7 @@ const sendEmail = async ({
       to: [to],
       subject,
       text,
+      html,
     });
     return result;
   } catch (error) {
@@ -38,14 +41,14 @@ export const sendResetPasswordEmail = async (
   name: string,
   resetToken: string
 ) => {
-  const { subject, text } = generateResetPasswordEmail(name, resetToken);
-  return sendEmail({ to, subject, text });
+  const { subject, text, html } = generateResetPasswordEmail(name, resetToken);
+  return sendEmail({ to, subject, text, html });
 };
 
 // Function to send a welcome email
 export const sendWelcomeEmail = async (to: string, name: string) => {
-  const { subject, text } = generateWelcomeEmail(name);
-  return sendEmail({ to, subject, text });
+  const { subject, text, html } = generateWelcomeEmail(name);
+  return sendEmail({ to, subject, text, html });
 };
 
 export default sendEmail;

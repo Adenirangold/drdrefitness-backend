@@ -12,6 +12,7 @@ import workflowRoute from "./routes/workflowRoute";
 import { configureSecurityMiddleware } from "./middleware/security";
 import errorHandler from "./middleware/errorHandler";
 import bodyParser from "body-parser";
+import { sendWelcomeEmail } from "./config/email";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/workflow", workflowRoute);
 app.use(errorHandler);
 
 // connectDatabase();
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, async () => {
+  await sendWelcomeEmail("Drelifestylecompany@gmail.com", `Adeniran Gold`);
   console.log(`Server running on port ${process.env.PORT}`);
 });
