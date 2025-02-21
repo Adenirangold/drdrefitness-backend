@@ -57,7 +57,7 @@ export const signup = async (
         ...req.body,
         currentSubscription: {
           ...req.body.currentSubscription,
-          transactionReference: paymentResponse.data.reference,
+          transactionReference: paymentResponse.data.data.reference,
         },
       })
     );
@@ -72,8 +72,8 @@ export const signup = async (
     res.status(200).json({
       status: "success",
       data: {
-        authorizationUrl: paymentResponse.data.authorization_url,
-        reference: paymentResponse.data.reference,
+        authorizationUrl: paymentResponse.data.data.authorization_url,
+        reference: paymentResponse.data.data.reference,
       },
     });
   } catch (error) {

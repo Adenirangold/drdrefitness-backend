@@ -21,7 +21,6 @@ export const initializePayment = async (
       next(new AppError("Email and amount are required", 400));
     }
 
-    // Initialize transaction
     const response = await paystackInitializePayment(email, amount, metadata);
 
     if (!response) {
@@ -99,7 +98,6 @@ export const handlePaystackWebhook = async (
 
     const event = req.body;
 
-    // Handle different webhook events
     switch (event.event) {
       case "charge.success":
         const { reference, status, payment_type, customer } = event.data;
@@ -111,7 +109,6 @@ export const handlePaystackWebhook = async (
             currentSubscription: {
               paymentMethod: payment_type || "card",
               paymentStatus: status === "success" ? "approved" : "declined",
-              lastPaymentDate: new Date(),
             },
           },
           { new: true }
@@ -134,8 +131,6 @@ export const handlePaystackWebhook = async (
           }
         );
         break;
-
-      // Add other event cases as needed
     }
 
     res.status(200).json({ status: "success" });
