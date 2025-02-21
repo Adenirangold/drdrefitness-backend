@@ -99,7 +99,7 @@ export const verifyPaymentAndActivate = async (
     }
 
     const member = await Member.findOneAndUpdate(
-      { paymentReference: reference },
+      { "currentSubscription.transactionReference": reference },
       {
         isActive: true,
         currentSubscription: {
