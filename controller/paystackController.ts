@@ -108,6 +108,7 @@ export const handlePaystackWebhook = async (
             isActive: status === "success",
             currentSubscription: {
               paymentMethod: payment_type || "card",
+              subscriptionStatus: "active",
               paymentStatus: status === "success" ? "approved" : "declined",
             },
           },

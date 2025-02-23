@@ -128,22 +128,22 @@ const memberSchema = new Schema(
         return undefined;
       },
     },
-    status: {
-      type: String,
-      enum: ["inactive", "active", "expired"],
-      default: function (this: { role: Role }) {
-        if (this.role === "member") {
-          return "inactive";
-        }
-
-        return undefined;
-      },
-    },
 
     currentSubscription: {
       plan: {
         type: Schema.Types.ObjectId,
         ref: "Plan",
+      },
+      subscriptionStatus: {
+        type: String,
+        enum: ["inactive", "active", "expired"],
+        default: function (this: { role: Role }) {
+          if (this.role === "member") {
+            return "inactive";
+          }
+
+          return undefined;
+        },
       },
 
       startDate: Date,
@@ -254,6 +254,15 @@ memberSchema.pre("save", function (next) {
     }
   }
 
+  next();
+});
+memberSchema.pre("save", function (next) {
+  if (this.currentSubscription && this.currentSubscription.endDate) {
+    const currentDate = new Date();
+    if (this.currentSubscription.endDate < currentDate) {
+      this.currentSubscription.subscriptionStatus = "expired";
+    }
+  }
   next();
 });
 memberSchema.pre("save", function (next) {
