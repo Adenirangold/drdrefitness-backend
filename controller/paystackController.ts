@@ -126,7 +126,7 @@ export const handlePaystackWebhook = async (
         await Member.findOneAndUpdate(
           { "currentSubscription.transactionReference": event.data.reference },
           {
-            "currentSubscription.paymentStatus": "failed",
+            "currentSubscription.paymentStatus": "declined",
             isActive: false,
           }
         );

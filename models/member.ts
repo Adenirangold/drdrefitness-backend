@@ -130,10 +130,10 @@ const memberSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["active", "expired", "suspended", "cancelled"],
+      enum: ["inactive", "active", "expired"],
       default: function (this: { role: Role }) {
         if (this.role === "member") {
-          return "active";
+          return "inactive";
         }
 
         return undefined;
