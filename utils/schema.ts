@@ -27,7 +27,6 @@ export const currentSubscriptionSchema = z.object({
     .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
 
   startDate: z.coerce.date(),
-  autoRenew: z.boolean().default(false),
 });
 
 const adminLocationSchema = z.object({

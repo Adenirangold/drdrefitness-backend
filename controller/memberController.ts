@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import Member from "../models/member";
 import AppError from "../utils/AppError";
 import { comparePasswords, hashPassword } from "../lib/util";
+import Plan from "../models/plan";
+import { paystackInitializePayment } from "../config/paystack";
 
 export const getMember = async (
   req: Request,
@@ -135,4 +137,35 @@ export const updateMemberPassword = async (
   } catch (error) {
     next(error);
   }
+};
+
+export const reactivateSubscription = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.user) {
+    return next(new AppError("Unauthorized", 401));
+  }
+  const plan = await Plan.findById(req.body.plan);
+  if (!plan) {
+    return next(new AppError("Plan does not exist", 404));
+  }
+  const paymentResponse = await paystackInitializePayment(
+    req.user.email,
+    plan.price,
+    {
+      phoneNumber: req.user.phoneNumber,
+      lastName: req.user.lastName,
+      firstName: req.user.firstName,
+    }
+  );
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      authorizationUrl: paymentResponse.data.data.authorization_url,
+      reference: paymentResponse.data.data.reference,
+    },
+  });
 };
