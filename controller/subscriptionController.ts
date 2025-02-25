@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
 import Plan from "../models/plan";
+import { paystackInitializePayment } from "../config/paystack";
 
 export const reactivateSubscription = async (
   req: Request,
@@ -14,7 +15,7 @@ export const reactivateSubscription = async (
       return next(new AppError("Unauthorised", 401));
     }
 
-    const existingPlan = await Plan.findById(req.body.currentSubscription.plan);
+    const existingPlan = await Plan.findById(req.body.plan);
     if (!existingPlan) {
       return next(
         new AppError("Plan for this subscription no longer exist", 404)
@@ -22,9 +23,18 @@ export const reactivateSubscription = async (
     }
 
     // //////////////payment////
+    const paymentResponse = await paystackInitializePayment(
+      req.user.email,
+      existingPlan.price,
+      {
+        phoneNumber: req.user.phoneNumber,
+        lastName: req.user.lastName,
+        firstName: req.user.firstName,
+      }
+    );
 
     const newSubscription = {
-      ...req.body.currentSubscription,
+      ...req.body,
     };
 
     const member = await Member.findById(currentMember._id);
@@ -45,12 +55,12 @@ export const reactivateSubscription = async (
     next(error);
   }
 };
-export const cancelSubscription = async (
+export const confirmSubscriptionPayment = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {};
-export const confirmPaymentStatus = async (
+export const cancelSubscription = async (
   req: Request,
   res: Response,
   next: NextFunction

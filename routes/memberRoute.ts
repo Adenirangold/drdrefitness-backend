@@ -25,11 +25,5 @@ router.patch(
   autheticateMember("member"),
   memberController.updateMemberPassword
 );
-router.patch(
-  "/subscription",
-  validateRequest(currentSubscriptionSchema),
-  autheticateMember("member"),
-  memberController.reactivateSubscription
-);
 
 export default router;

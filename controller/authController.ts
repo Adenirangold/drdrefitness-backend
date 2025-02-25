@@ -52,16 +52,13 @@ export const signup = async (
       }
     );
 
-    const newMember = new Member(
-      new Member({
-        ...req.body,
-        currentSubscription: {
-          ...req.body.currentSubscription,
-          transactionReference: paymentResponse.data.data.reference,
-        },
-      })
-    );
-
+    const newMember = new Member({
+      ...req.body,
+      currentSubscription: {
+        ...req.body.currentSubscription,
+        transactionReference: paymentResponse.data.data.reference,
+      },
+    });
     const savedMember = await newMember.save();
     savedMember.password = "";
 
