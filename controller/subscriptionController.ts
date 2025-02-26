@@ -2,7 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Member from "../models/member";
 import Plan from "../models/plan";
-import { paystackInitializePayment } from "../config/paystack";
+import {
+  paystackInitializePayment,
+  paystackVerifyPayment,
+} from "../config/paystack";
+import { sendWelcomeEmail } from "../config/email";
 
 export const reactivateSubscription = async (
   req: Request,
@@ -22,7 +26,6 @@ export const reactivateSubscription = async (
       );
     }
 
-    // //////////////payment////
     const paymentResponse = await paystackInitializePayment(
       req.user.email,
       existingPlan.price,
@@ -33,23 +36,28 @@ export const reactivateSubscription = async (
       }
     );
 
-    const newSubscription = {
-      ...req.body,
-    };
-
-    const member = await Member.findById(currentMember._id);
-
-    if (!member) {
-      return next(new AppError("This member does not exist", 404));
-    }
-
-    member.currentSubscription = newSubscription;
-
-    const updatedMember = member.save();
+    const updatedMember = await Member.findByIdAndUpdate(
+      req.user._id,
+      {
+        currentSubscription: {
+          transactionReference: paymentResponse.data.data.reference,
+          plan: existingPlan._id,
+          startDate: req.body.startDate,
+          subscriptionStatus: "inactive",
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     res.status(200).json({
       status: "success",
-      message: "subscription sucessfull",
+      data: {
+        authorizationUrl: paymentResponse.data.data.authorization_url,
+        reference: paymentResponse.data.data.reference,
+      },
     });
   } catch (error) {
     next(error);
@@ -59,7 +67,50 @@ export const confirmSubscriptionPayment = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  const { reference } = req.params;
+
+  const verificationResponse = await paystackVerifyPayment(reference);
+
+  if (
+    !verificationResponse.status ||
+    verificationResponse.status !== "success"
+  ) {
+    return next(new AppError("Payment verification failed", 400));
+  }
+
+  const member = await Member.findOne({
+    "currentSubscription.transactionReference": reference,
+  });
+
+  if (!member) {
+    return next(new AppError("Member not found", 404));
+  }
+
+  member.isActive = true;
+  member.currentSubscription = {
+    ...member.currentSubscription,
+    paymentMethod: verificationResponse.payment_type || "card",
+    subscriptionStatus: "active",
+    paymentStatus:
+      verificationResponse.status === "success" ? "approved" : "declined",
+
+    startDate: new Date(),
+    autoRenew: false,
+  };
+
+  await member.save();
+
+  await sendWelcomeEmail(
+    "adeniranbayogold@gmail.com",
+    `${member.firstName}${" "}${member.lastName}`
+  );
+
+  res.status(200).json({
+    status: "success",
+    message: "subscription reactivation sucessfull",
+  });
+};
 export const cancelSubscription = async (
   req: Request,
   res: Response,
