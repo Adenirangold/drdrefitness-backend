@@ -6,7 +6,8 @@ import {
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
-import { sendWelcomeEmail } from "../config/email";
+import { sendSubscriptionEmail, sendWelcomeEmail } from "../config/email";
+import { formatDate } from "../lib/util";
 
 export const reactivateSubscription = async (
   req: Request,
@@ -81,7 +82,7 @@ export const confirmSubscriptionPayment = async (
 
   const member = await Member.findOne({
     "currentSubscription.transactionReference": reference,
-  });
+  }).populate("currentSubscription.plan");
 
   if (!member) {
     return next(new AppError("Member not found", 404));
@@ -101,9 +102,14 @@ export const confirmSubscriptionPayment = async (
 
   await member.save();
 
-  await sendWelcomeEmail(
+  const plan = await Plan.findById(member.currentSubscription.plan);
+
+  await sendSubscriptionEmail(
     "adeniranbayogold@gmail.com",
-    `${member.firstName}${" "}${member.lastName}`
+    `${member.firstName}${" "}${member.lastName}`,
+    `${plan?.name || ""}`,
+    `${formatDate(member.currentSubscription.endDate!)}`,
+    plan?.duration!
   );
 
   res.status(200).json({

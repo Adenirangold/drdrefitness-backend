@@ -2,6 +2,7 @@ import mailgun from "mailgun.js";
 import formData from "form-data";
 import {
   generateResetPasswordEmail,
+  generateResubscriptionEmail,
   generateWelcomeEmail,
 } from "../utils/emailTemplate";
 
@@ -48,6 +49,22 @@ export const sendResetPasswordEmail = async (
 // Function to send a welcome email
 export const sendWelcomeEmail = async (to: string, name: string) => {
   const { subject, text, html } = generateWelcomeEmail(name);
+  return sendEmail({ to, subject, text, html });
+};
+
+export const sendSubscriptionEmail = async (
+  to: string,
+  name: string,
+  packageName: string,
+  endDate: string,
+  daysDuration: number
+) => {
+  const { subject, text, html } = generateResubscriptionEmail(
+    name,
+    packageName,
+    endDate,
+    daysDuration
+  );
   return sendEmail({ to, subject, text, html });
 };
 
