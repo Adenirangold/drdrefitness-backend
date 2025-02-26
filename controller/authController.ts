@@ -98,11 +98,12 @@ export const verifyPaymentAndActivate = async (
     const member = await Member.findOneAndUpdate(
       { "currentSubscription.transactionReference": reference },
       {
-        isActive: true,
-        currentSubscription: {
-          paymentMethod: verificationResponse.payment_type || "card",
-          subscriptionStatus: "active",
-          paymentStatus:
+        $set: {
+          isActive: true,
+          "currentSubscription.paymentMethod":
+            verificationResponse.payment_type || "card",
+          "currentSubscription.subscriptionStatus": "active",
+          "currentSubscription.paymentStatus":
             verificationResponse.status === "success" ? "approved" : "declined",
         },
       },

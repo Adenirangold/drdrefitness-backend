@@ -114,7 +114,7 @@ export const confirmSubscriptionPayment = async (
 
   res.status(200).json({
     status: "success",
-    message: "subscription reactivation sucessfull",
+    message: "subscription reactivation successfull",
   });
 };
 export const cancelSubscription = async (
