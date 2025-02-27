@@ -2,6 +2,7 @@ import express from "express";
 import validateRequest from "../middleware/validation";
 import { currentSubscriptionSchema } from "../utils/schema";
 import {
+  cancelSubscription,
   confirmSubscriptionPayment,
   reactivateSubscription,
 } from "../controller/subscriptionController";
@@ -20,6 +21,8 @@ router.get(
   autheticateMember("member"),
   confirmSubscriptionPayment
 );
+
+router.delete("/", autheticateMember("member"), cancelSubscription);
 
 export default router;
 2;

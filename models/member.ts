@@ -136,7 +136,7 @@ const memberSchema = new Schema(
       },
       subscriptionStatus: {
         type: String,
-        enum: ["inactive", "active", "expired"],
+        enum: ["inactive", "active", "expired", "cancelled"],
         default: function (this: { role: Role }) {
           if (this.role === "member") {
             return "inactive";

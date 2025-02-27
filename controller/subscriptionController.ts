@@ -117,8 +117,49 @@ export const confirmSubscriptionPayment = async (
     message: "subscription reactivation successfull",
   });
 };
+
 export const cancelSubscription = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  try {
+    const currentMember = req.user;
+
+    if (!currentMember) {
+      return next(new AppError("Unauthorised", 401));
+    }
+
+    if (
+      !currentMember.currentSubscription ||
+      currentMember.currentSubscription.subscriptionStatus !== "active"
+    ) {
+      return next(new AppError("No active subscription to cancel", 400));
+    }
+
+    const updatedMember = await Member.findByIdAndUpdate(
+      currentMember._id,
+      {
+        $set: {
+          isActive: false,
+          "currentSubscription.subscriptionStatus": "cancelled",
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedMember) {
+      return next(new AppError("Member not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Subscription cancelled successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
