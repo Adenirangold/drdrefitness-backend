@@ -37,5 +37,4 @@ app.listen(process.env.PORT, async () => {
   // await sendWelcomeEmail("adeniranbayogold@gmail.com", `Adeniran Gold`);
 
   console.log(`Server running on port ${process.env.PORT}`);
-  console.log(`Server running on port ${process.env.PORT}`);
 });
