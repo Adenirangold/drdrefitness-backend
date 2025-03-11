@@ -59,6 +59,7 @@ export const signup = async (
         transactionReference: paymentResponse.data.data.reference,
       },
     });
+
     const savedMember = await newMember.save();
     savedMember.password = "";
 

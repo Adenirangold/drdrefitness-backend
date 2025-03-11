@@ -12,6 +12,11 @@ const planSchema = new Schema({
     required: true,
     trim: true,
   },
+  planType: {
+    type: String,
+    enum: ["individual", "couple", "family"],
+    default: "individual",
+  },
 
   gymLocation: {
     type: String,
