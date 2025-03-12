@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Role, SubscriptionData, UserInput } from "../types";
 import { calculateEndDate, hashPassword } from "../lib/util";
 import Plan from "./plan";
+import { boolean } from "zod";
 
 const Schema = mongoose.Schema;
 
@@ -187,6 +188,69 @@ const memberSchema = new Schema(
       },
     ],
 
+    isGroup: {
+      type: Boolean,
+      default: function (this: { role: Role }) {
+        if (this.role === "member") {
+          return false;
+        }
+
+        return undefined;
+      },
+    },
+    groupRole: {
+      type: String,
+      enum: ["primary", "dependant", "none"],
+      default: function (this: { role: Role }) {
+        if (this.role === "member") {
+          return "none";
+        }
+
+        return undefined;
+      },
+    },
+
+    groupSubscription: {
+      groupType: {
+        type: String,
+        enum: ["couple", "family"],
+        required: function (this: any) {
+          return this?.isGroup === true;
+        },
+      },
+      primaryMember: {
+        type: Schema.Types.ObjectId,
+        ref: "Member",
+        required: function (this: any) {
+          return this?.isGroup === true && this?.groupRole === "dependant";
+        },
+      },
+      dependantMembers: [
+        {
+          member: {
+            type: Schema.Types.ObjectId,
+            ref: "Member",
+            required: function (this: any) {
+              return this?.isGroup === true && this?.groupRole === "primary";
+            },
+          },
+          status: {
+            type: String,
+            enum: ["pending", "active", "removed"],
+            required: function (this: any) {
+              return this?.isGroup === true && this?.groupRole === "primary";
+            },
+          },
+          joinedAt: {
+            type: Date,
+            required: function (this: any) {
+              return this?.isGroup === true && this?.groupRole === "primary";
+            },
+          },
+        },
+      ],
+    },
+
     passwordResetToken: String,
     passwordExpiredAt: Date,
   },
@@ -268,6 +332,13 @@ memberSchema.pre("save", function (next) {
 memberSchema.pre("save", function (next) {
   if (this.role !== "member" && this.membershipHistory.length === 0) {
     (this as any).membershipHistory = undefined;
+    (this as any).groupSubscription.dependantMembers = undefined;
+  }
+  next();
+});
+memberSchema.pre("save", function (next) {
+  if (this.isGroup === false) {
+    this.groupSubscription = undefined;
   }
   next();
 });
