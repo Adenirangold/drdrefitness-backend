@@ -14,6 +14,7 @@ import {
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
+import { group } from "console";
 
 export const signup = async (
   req: Request,
@@ -52,11 +53,19 @@ export const signup = async (
       }
     );
 
+    const isGroupPlan =
+      plan.planType === "couple" || plan.planType === "family";
+
     const newMember = new Member({
       ...req.body,
       currentSubscription: {
         ...req.body.currentSubscription,
         transactionReference: paymentResponse.data.data.reference,
+      },
+      isGroup: isGroupPlan,
+      groupRole: isGroupPlan ? "primary" : undefined,
+      groupSubscription: {
+        groupType: isGroupPlan ? plan.planType : undefined,
       },
     });
 

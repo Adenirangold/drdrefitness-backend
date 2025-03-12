@@ -109,6 +109,7 @@ export const passwordresetSchema = z
 
 export const planSchema = z.object({
   planId: z.string().min(2).max(50),
+  planType: z.enum(["individual", "couple", "family"]).default("family"),
   name: z.string().min(2).max(50),
   gymLocation: z.string().min(2).max(50),
   gymBranch: z.string().min(2).max(50),

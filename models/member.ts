@@ -332,6 +332,7 @@ memberSchema.pre("save", function (next) {
 memberSchema.pre("save", function (next) {
   if (this.role !== "member" && this.membershipHistory.length === 0) {
     (this as any).membershipHistory = undefined;
+    (this as any).groupSubscription = undefined;
     (this as any).groupSubscription.dependantMembers = undefined;
   }
   next();
