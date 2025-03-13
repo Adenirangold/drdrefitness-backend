@@ -1,7 +1,7 @@
 import express from "express";
 import validateRequest from "../middleware/validation";
 import {
-  forgotPasswordSchema,
+  emailAloneSchema,
   loginSchema,
   memberSchema,
   passwordresetSchema,
@@ -21,7 +21,7 @@ router.post("/login", validateRequest(loginSchema), authController.login);
 
 router.post(
   "/forgot-password",
-  validateRequest(forgotPasswordSchema),
+  validateRequest(emailAloneSchema),
   authController.forgotPassword
 );
 

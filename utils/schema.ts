@@ -77,7 +77,7 @@ export const loginSchema = memberSchema.innerType().pick({
   email: true,
   password: true,
 });
-export const forgotPasswordSchema = memberSchema.innerType().pick({
+export const emailAloneSchema = memberSchema.innerType().pick({
   email: true,
 });
 

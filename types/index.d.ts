@@ -36,3 +36,14 @@ export interface PaystackResponse {
     reference: string;
   };
 }
+
+export interface GroupSupscriptionEmail {
+  inviterName: string;
+  inviteeName: string;
+  inviteeEmail: string;
+  planName: string;
+  planEndDate: string;
+  planLocation: string;
+  planBranch: string;
+  inviteLink: string;
+}

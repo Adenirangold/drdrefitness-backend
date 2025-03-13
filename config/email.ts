@@ -3,8 +3,10 @@ import formData from "form-data";
 import {
   generateResetPasswordEmail,
   generateResubscriptionEmail,
+  generateSubscriptionInvitationEmail,
   generateWelcomeEmail,
 } from "../utils/emailTemplate";
+import { GroupSupscriptionEmail } from "../types";
 
 const mg = new mailgun(formData).client({
   username: "api",
@@ -68,4 +70,26 @@ export const sendSubscriptionEmail = async (
   return sendEmail({ to, subject, text, html });
 };
 
+export const sendGroupInvitationEmail = async ({
+  inviterName,
+  inviteeName,
+  inviteeEmail,
+  planName,
+  planEndDate,
+  planLocation,
+  planBranch,
+  inviteLink,
+}: GroupSupscriptionEmail) => {
+  const { subject, text, html } = generateSubscriptionInvitationEmail(
+    inviterName,
+    inviteeName,
+    inviteeEmail,
+    planName,
+    planEndDate,
+    planLocation,
+    planBranch,
+    inviteLink
+  );
+  return sendEmail({ to: inviteeEmail, subject, text, html });
+};
 export default sendEmail;

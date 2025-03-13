@@ -322,3 +322,131 @@ export const generateResubscriptionEmail = (
     `,
   };
 };
+
+export const generateSubscriptionInvitationEmail = (
+  inviterName: string,
+  inviteeName: string,
+  inviteeEmail: string,
+  planName: string,
+  planEndDate: string,
+  planLocation: string,
+  planBranch: string,
+  inviteLink: string
+) => {
+  return {
+    subject: `${inviterName} has invited you to join Drdrefitness on the ${planName} plan!`,
+    text: `
+      Hello ${inviteeName},
+      
+      You’ve been personally invited by ${inviterName} to join Drdrefitness on our ${planName} plan. Here are the details:
+  
+      - Plan Name: ${planName}
+      - End Date: ${planEndDate}
+      - Location: ${planLocation}
+      - Branch: ${planBranch}
+      
+      Click the link below to accept the invitation and start your journey with us:
+      
+      ${inviteLink}
+      
+      Best regards,
+      Drdrefitness Team`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+              body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  line-height: 1.6;
+                  color: #333333;
+                  margin: 0;
+                  padding: 0;
+              }
+              .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  background-color: #ffffff;
+              }
+              .header {
+                  text-align: center;
+                  padding: 20px 0;
+                  border-bottom: 1px solid #eeeeee;
+              }
+              .content {
+                  padding: 30px 0;
+              }
+              .button {
+                  display: inline-block;
+                  padding: 12px 24px;
+                  background-color: #4CAF50;
+                  color: #ffffff;
+                  text-decoration: none;
+                  border-radius: 4px;
+                  margin: 20px 0;
+                  font-weight: bold;
+              }
+              .footer {
+                  text-align: center;
+                  padding-top: 20px;
+                  border-top: 1px solid #eeeeee;
+                  color: #666666;
+                  font-size: 14px;
+              }
+              .invitation-message {
+                  text-align: center;
+                  font-size: 18px;
+                  margin: 20px 0;
+                  color: #4CAF50;
+              }
+              .details {
+                  margin-top: 20px;
+              }
+              .details li {
+                  margin-bottom: 10px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h2>You’ve been invited to join Drdrefitness!</h2>
+              </div>
+              
+              <div class="content">
+                  <p>Hello ${inviteeName},</p>
+                  
+                  <div class="invitation-message">
+                      <p>🎉 You’ve been personally invited by ${inviterName} to join Drdrefitness! 🎉</p>
+                  </div>
+                  
+                  <p>Here are the details of the plan:</p>
+                  <ul class="details">
+                      <li><strong>Plan Name:</strong> ${planName}</li>
+                      <li><strong>End Date:</strong> ${planEndDate}</li>
+                      <li><strong>Location:</strong> ${planLocation}</li>
+                      <li><strong>Branch:</strong> ${planBranch}</li>
+                  </ul>
+                  
+                  <div style="text-align: center;">
+                      <a href="${inviteLink}" class="button">Accept Invitation</a>
+                  </div>
+                  
+                  <p>If you have any questions, feel free to reach out to our support team.</p>
+                  
+                  <p><strong>Your email:</strong> ${inviteeEmail}</p>
+              </div>
+              
+              <div class="footer">
+                  <p>Best regards,</p>
+                  <p>Drdrefitness Team</p>
+              </div>
+          </div>
+      </body>
+      </html>
+      `,
+  };
+};

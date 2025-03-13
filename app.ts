@@ -6,6 +6,7 @@ import memberRoute from "./routes/memberRoute";
 import planRoute from "./routes/planRoute";
 import authRoute from "./routes/authRoute";
 import subscriptionRoute from "./routes/subscriptionRoute";
+import groupRoute from "./routes/groupRoute";
 import adminRoute from "./routes/adminRoute";
 import paystackRoute from "./routes/paystackRoute";
 import workflowRoute from "./routes/workflowRoute";
@@ -27,6 +28,7 @@ app.use("/api/members", memberRoute);
 app.use("/api/plans", planRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/subscription", subscriptionRoute);
+app.use("/api/group-subscription", groupRoute);
 app.use("/api/paystack", paystackRoute);
 app.use("/api/workflow", workflowRoute);
 
