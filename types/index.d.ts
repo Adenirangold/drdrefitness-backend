@@ -39,7 +39,6 @@ export interface PaystackResponse {
 
 export interface GroupSupscriptionEmail {
   inviterName: string;
-  inviteeName: string;
   inviteeEmail: string;
   planName: string;
   planEndDate: string;

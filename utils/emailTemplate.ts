@@ -325,7 +325,6 @@ export const generateResubscriptionEmail = (
 
 export const generateSubscriptionInvitationEmail = (
   inviterName: string,
-  inviteeName: string,
   inviteeEmail: string,
   planName: string,
   planEndDate: string,
@@ -336,7 +335,7 @@ export const generateSubscriptionInvitationEmail = (
   return {
     subject: `${inviterName} has invited you to join Drdrefitness on the ${planName} plan!`,
     text: `
-      Hello ${inviteeName},
+      Hello!!!
       
       You’ve been personally invited by ${inviterName} to join Drdrefitness on our ${planName} plan. Here are the details:
   
@@ -417,7 +416,6 @@ export const generateSubscriptionInvitationEmail = (
               </div>
               
               <div class="content">
-                  <p>Hello ${inviteeName},</p>
                   
                   <div class="invitation-message">
                       <p>🎉 You’ve been personally invited by ${inviterName} to join Drdrefitness! 🎉</p>

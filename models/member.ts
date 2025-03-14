@@ -218,6 +218,26 @@ const memberSchema = new Schema(
           return this?.isGroup === true;
         },
       },
+
+      groupMaxMember: {
+        type: Number,
+        default: function (this: any) {
+          if (this.role === "member") {
+            if (
+              this.groupSubscription &&
+              this.groupSubscription.groupType === "couple"
+            )
+              return 2;
+            if (
+              this.groupSubscription &&
+              this.groupSubscription.groupType === "family"
+            )
+              return 4;
+          }
+
+          return undefined;
+        },
+      },
       primaryMember: {
         type: Schema.Types.ObjectId,
         ref: "Member",

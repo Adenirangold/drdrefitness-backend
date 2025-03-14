@@ -72,7 +72,6 @@ export const sendSubscriptionEmail = async (
 
 export const sendGroupInvitationEmail = async ({
   inviterName,
-  inviteeName,
   inviteeEmail,
   planName,
   planEndDate,
@@ -82,7 +81,6 @@ export const sendGroupInvitationEmail = async ({
 }: GroupSupscriptionEmail) => {
   const { subject, text, html } = generateSubscriptionInvitationEmail(
     inviterName,
-    inviteeName,
     inviteeEmail,
     planName,
     planEndDate,
