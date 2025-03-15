@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/AppError";
 import Plan from "../models/plan";
 import { sendGroupInvitationEmail } from "../config/email";
+import { log } from "console";
+import Member from "../models/member";
 
 export const sendGroupInvitation = async (
   req: Request,
@@ -55,7 +57,7 @@ export const sendGroupInvitation = async (
       planEndDate: member.currentSubscription.endDate,
       planLocation: plan.gymLocation,
       planBranch: plan.gymBranch,
-      inviteLink: "/local",
+      inviteLink: `/local/${member.groupSubscription.groupInviteToken}`,
     });
 
     if (!result) {
@@ -66,6 +68,69 @@ export const sendGroupInvitation = async (
     res.status(200).json({
       status: "success",
       message: `Reset token sent `,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const acceptGroupInvitation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const primaryMember = await Member.findOne({
+      "groupSubscription.groupInviteToken": req.params.token,
+    });
+    if (!primaryMember) {
+      return next(new AppError("No primary member found", 401));
+    }
+    if (
+      !primaryMember.groupSubscription ||
+      primaryMember.groupSubscription.dependantMembers.length >=
+        primaryMember.groupSubscription.groupMaxMember
+    ) {
+      return next(
+        new AppError("The group is full. Cannot add more members.", 400)
+      );
+    }
+
+    const dependentMember = new Member({
+      ...req.body,
+      currentSubscription: {
+        ...primaryMember.currentSubscription,
+      },
+      isGroup: true,
+      groupRole: "dependant",
+      groupSubscription: {
+        groupType: primaryMember.groupSubscription?.groupType,
+        primaryMember: primaryMember._id,
+      },
+    });
+
+    const savedMember = await dependentMember.save();
+
+    const updatedPrimaryMember = await Member.findOneAndUpdate(
+      { _id: primaryMember._id },
+      {
+        $push: {
+          "groupSubscription.dependantMembers": {
+            member: savedMember._id,
+            status: "active",
+            joinedAt: new Date(),
+          },
+        },
+      }
+    );
+    if (!updatedPrimaryMember) {
+      return next(
+        new AppError("Failed to update primary member with dependant", 500)
+      );
+    }
+    res.status(200).json({
+      status: "success",
+      message: `Dependent member added successfully`,
     });
   } catch (error) {
     next(error);

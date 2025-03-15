@@ -3,6 +3,7 @@ import { Role, SubscriptionData, UserInput } from "../types";
 import { calculateEndDate, hashPassword } from "../lib/util";
 import Plan from "./plan";
 import { boolean } from "zod";
+import { log } from "console";
 
 const Schema = mongoose.Schema;
 
@@ -238,6 +239,9 @@ const memberSchema = new Schema(
           return undefined;
         },
       },
+      groupInviteToken: {
+        type: String,
+      },
       primaryMember: {
         type: Schema.Types.ObjectId,
         ref: "Member",
@@ -343,12 +347,15 @@ memberSchema.pre("save", function (next) {
 memberSchema.pre("save", function (next) {
   if (this.currentSubscription && this.currentSubscription.endDate) {
     const currentDate = new Date();
-    if (this.currentSubscription.endDate < currentDate) {
+    const endDate = new Date(this.currentSubscription.endDate);
+
+    if (endDate < currentDate) {
       this.currentSubscription.subscriptionStatus = "expired";
     }
   }
   next();
 });
+
 memberSchema.pre("save", function (next) {
   if (this.role !== "member" && this.membershipHistory.length === 0) {
     (this as any).membershipHistory = undefined;
@@ -360,6 +367,13 @@ memberSchema.pre("save", function (next) {
 memberSchema.pre("save", function (next) {
   if (this.isGroup === false) {
     this.groupSubscription = undefined;
+  }
+  next();
+});
+memberSchema.pre("save", function (next) {
+  if (this.groupRole === "dependant") {
+    (this as any).groupSubscription.dependantMembers = undefined;
+    (this as any).groupSubscription.groupMaxMember = undefined;
   }
   next();
 });

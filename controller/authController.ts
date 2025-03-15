@@ -55,6 +55,7 @@ export const signup = async (
 
     const isGroupPlan =
       plan.planType === "couple" || plan.planType === "family";
+    const { hashedtoken } = createHashedToken();
 
     const newMember = new Member({
       ...req.body,
@@ -66,6 +67,7 @@ export const signup = async (
       groupRole: isGroupPlan ? "primary" : undefined,
       groupSubscription: {
         groupType: isGroupPlan ? plan.planType : undefined,
+        groupInviteToken: isGroupPlan ? hashedtoken : undefined,
       },
     });
 
