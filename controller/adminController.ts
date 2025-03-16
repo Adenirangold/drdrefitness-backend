@@ -94,6 +94,10 @@ export const getAdminBranchMember = async (
       },
     ]);
 
+    if (!members) {
+      return next(new AppError("Unable to fetch member", 500));
+    }
+
     res.status(200).json({
       status: "success",
       data: {
