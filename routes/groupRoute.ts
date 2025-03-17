@@ -14,7 +14,7 @@ router.post(
   groupController.sendGroupInvitation
 );
 router.post(
-  "/:token",
+  "/:token/:id",
 
   validateRequest(groupMemberSchema),
   groupController.acceptGroupInvitation

@@ -24,7 +24,7 @@ export const comparePasswords = async (
   }
 };
 
-export const getJWTToken = (id: string): string => {
+export const getJWTToken = (payload: object): string => {
   const secret = process.env.JWT_SECRET;
   const expiresIn = process.env.JWT_EXPIRES_IN;
 
@@ -39,7 +39,7 @@ export const getJWTToken = (id: string): string => {
 
   try {
     return jwt.sign(
-      { id } as TokenPayload,
+      payload as TokenPayload,
       Buffer.from(secret, "utf-8"),
       options
     );
@@ -56,7 +56,7 @@ export const sendAuthResponse = (
   email: string
 ): void => {
   try {
-    const token = getJWTToken(userId.toString());
+    const token = getJWTToken({ id: userId.toString() });
 
     const authResponse: AuthResponse = {
       data: {

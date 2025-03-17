@@ -5,6 +5,7 @@ import crypto from "crypto";
 import {
   comparePasswords,
   createHashedToken,
+  getJWTToken,
   hashPassword,
   sendAuthResponse,
 } from "../lib/util";
@@ -55,6 +56,7 @@ export const signup = async (
 
     const isGroupPlan =
       plan.planType === "couple" || plan.planType === "family";
+
     const { hashedtoken } = createHashedToken();
 
     const newMember = new Member({

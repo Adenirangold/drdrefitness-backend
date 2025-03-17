@@ -4,6 +4,7 @@ import Plan from "../models/plan";
 import { sendGroupInvitationEmail } from "../config/email";
 import { log } from "console";
 import Member from "../models/member";
+import { getJWTToken, verifyToken } from "../lib/util";
 
 export const sendGroupInvitation = async (
   req: Request,
@@ -12,7 +13,6 @@ export const sendGroupInvitation = async (
 ) => {
   try {
     const member = req.user;
-    console.log(member);
 
     if (member.isActive === false) {
       return next(
@@ -50,6 +50,9 @@ export const sendGroupInvitation = async (
       return next(new AppError("Invalid subscription plan", 400));
     }
 
+    const token = getJWTToken({ email: req.body.email });
+    console.log(token);
+
     const result = await sendGroupInvitationEmail({
       inviterName: `${member.firstName}${" "}${member.lastName}`,
       inviteeEmail: req.body.email,
@@ -57,7 +60,7 @@ export const sendGroupInvitation = async (
       planEndDate: member.currentSubscription.endDate,
       planLocation: plan.gymLocation,
       planBranch: plan.gymBranch,
-      inviteLink: `/local/${member.groupSubscription.groupInviteToken}`,
+      inviteLink: `/local/${member.groupSubscription.groupInviteToken}/${token}`,
     });
 
     if (!result) {
@@ -80,6 +83,11 @@ export const acceptGroupInvitation = async (
   next: NextFunction
 ) => {
   try {
+    const decodedToken = verifyToken(req.params.id!);
+
+    if (decodedToken?.email !== req.body.email) {
+      return next(new AppError("Unanthorised to join group", 401));
+    }
     const primaryMember = await Member.findOne({
       "groupSubscription.groupInviteToken": req.params.token,
     });
@@ -98,6 +106,8 @@ export const acceptGroupInvitation = async (
 
     const dependentMember = new Member({
       ...req.body,
+
+      isActive: true,
       currentSubscription: {
         ...primaryMember.currentSubscription,
       },
