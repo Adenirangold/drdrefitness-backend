@@ -117,6 +117,7 @@ export const verifyPaymentAndActivate = async (
           "currentSubscription.paymentMethod":
             verificationResponse.payment_type || "card",
           "currentSubscription.subscriptionStatus": "active",
+          "currentSubscription.startDate": new Date(),
           "currentSubscription.paymentStatus":
             verificationResponse.status === "success" ? "approved" : "declined",
         },

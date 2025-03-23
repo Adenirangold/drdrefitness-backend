@@ -130,6 +130,16 @@ const memberSchema = new Schema(
         return undefined;
       },
     },
+    registrationDate: {
+      type: Date,
+      default: function (this: { role: Role }) {
+        if (this.role === "member") {
+          return new Date();
+        }
+
+        return undefined;
+      },
+    },
 
     currentSubscription: {
       plan: {
