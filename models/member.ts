@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 import { Role, SubscriptionData, UserInput } from "../types";
 import { calculateEndDate, hashPassword } from "../lib/util";
 import Plan from "./plan";
-import { boolean } from "zod";
-import { log } from "console";
 
 const Schema = mongoose.Schema;
+
+const counterSchema = new mongoose.Schema({
+  collectionName: { type: String, required: true },
+  count: { type: Number, default: 0 },
+});
+
+const Counter = mongoose.model("Counter", counterSchema);
 
 const memberSchema = new Schema(
   {
@@ -290,6 +295,27 @@ const memberSchema = new Schema(
   },
   { timestamps: true }
 );
+
+memberSchema.pre("save", async function (next) {
+  const member = this;
+
+  if (!member.isNew) return next();
+
+  try {
+    const counter = await Counter.findOneAndUpdate(
+      { collectionName: "members" },
+      { $inc: { count: 1 } },
+      { new: true, upsert: true }
+    );
+
+    const paddedCount = String(counter.count).padStart(4, "0");
+    member.regNumber = `REG-${paddedCount}`;
+
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
 
 memberSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

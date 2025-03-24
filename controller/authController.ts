@@ -15,7 +15,6 @@ import {
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
-import { group } from "console";
 
 export const signup = async (
   req: Request,
