@@ -128,10 +128,14 @@ export const verifyPaymentAndActivate = async (
       return next(new AppError("Member not found", 404));
     }
 
-    await sendWelcomeEmail(
-      "adeniranbayogold@gmail.com",
-      `${member.firstName}${" "}${member.lastName}`
-    );
+    try {
+      await sendWelcomeEmail(
+        "adeniranbayogold@gmail.com",
+        `${member.firstName}${" "}${member.lastName}`
+      );
+    } catch (err) {
+      console.log("error sending mail");
+    }
 
     sendAuthResponse(res, member._id, member.email!);
   } catch (error) {
