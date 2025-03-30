@@ -33,9 +33,7 @@ export const getAllPlans = async (
     }
     res.status(200).json({
       status: "success",
-      data: {
-        plans,
-      },
+      data: plans,
     });
   } catch (err) {
     next(err);
@@ -57,9 +55,7 @@ export const getPlan = async (
 
     res.status(200).json({
       status: "success",
-      data: {
-        plan,
-      },
+      data: plan,
     });
   } catch (err) {
     next(err);

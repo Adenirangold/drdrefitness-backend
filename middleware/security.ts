@@ -19,15 +19,6 @@ const speedLimiter = slowDown({
 });
 
 const configureSecurityMiddleware = (app: express.Application) => {
-  app.use(cors());
-  app.use(
-    cors({
-      origin: ["http://localhost:3000", "https://yourdomain.com"],
-      methods: ["GET", "POST", "PUT", "DELETE"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-      credentials: true,
-    })
-  );
   app.use(helmet());
 
   app.set("trust proxy", 1);

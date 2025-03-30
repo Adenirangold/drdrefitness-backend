@@ -36,7 +36,6 @@ const adminLocationSchema = z.object({
 
 export const memberSchema = z
   .object({
-    // regNumber: z.string().min(2).max(50),
     firstName: z.string().min(2).max(50),
     lastName: z.string().min(2).max(50),
     email: z.string().email(),
@@ -64,7 +63,6 @@ export const memberSchema = z
 
 export const groupMemberSchema = memberSchema.innerType().pick({
   email: true,
-  // regNumber: true,
   password: true,
   firstName: true,
   lastName: true,
@@ -78,7 +76,6 @@ export const groupMemberSchema = memberSchema.innerType().pick({
 });
 export const adminSchema = memberSchema.innerType().pick({
   email: true,
-  // regNumber: true,
   password: true,
   firstName: true,
   lastName: true,

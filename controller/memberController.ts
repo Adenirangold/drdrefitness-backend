@@ -23,9 +23,7 @@ export const getMember = async (
 
     res.status(200).json({
       status: "success",
-      data: {
-        member,
-      },
+      data: member,
     });
   } catch (error) {
     next(error);
@@ -78,9 +76,7 @@ export const updateMember = async (
 
     res.status(200).json({
       status: "success",
-      data: {
-        member: updatedMember,
-      },
+      data: updatedMember,
     });
   } catch (error) {
     next(error);

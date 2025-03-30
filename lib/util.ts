@@ -59,17 +59,16 @@ export const sendAuthResponse = (
     const token = getJWTToken({ id: userId.toString() });
 
     const authResponse: AuthResponse = {
-      data: {
-        id: userId.toString(),
-        email,
-      },
+      id: userId.toString(),
+      email,
       token,
     };
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
 
     res.status(200).json({

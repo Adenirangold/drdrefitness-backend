@@ -100,9 +100,7 @@ export const getAdminBranchMember = async (
 
     res.status(200).json({
       status: "success",
-      data: {
-        member: members || [],
-      },
+      data: members || [],
     });
   } catch (err) {
     next(err);
