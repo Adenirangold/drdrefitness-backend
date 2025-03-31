@@ -21,7 +21,7 @@ const app = express();
 configureSecurityMiddleware(app);
 app.use(
   cors({
-    origin: "http://localhost:3001",
+    origin: "https://4d7f-105-113-81-163.ngrok-free.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

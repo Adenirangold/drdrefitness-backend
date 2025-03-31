@@ -65,10 +65,10 @@ export const sendAuthResponse = (
     };
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "none",
+      secure: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
+      sameSite: "none",
     });
 
     res.status(200).json({
