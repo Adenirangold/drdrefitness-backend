@@ -63,13 +63,6 @@ export const sendAuthResponse = (
       email,
       token,
     };
-    res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: "/",
-      sameSite: "none",
-    });
 
     res.status(200).json({
       status: "success",
