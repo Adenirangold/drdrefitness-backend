@@ -5,6 +5,7 @@ import {
   loginSchema,
   memberSchema,
   passwordresetSchema,
+  passwordUpdateSchema,
 } from "../utils/schema";
 import * as authController from "../controller/authController";
 

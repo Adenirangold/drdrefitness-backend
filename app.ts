@@ -18,10 +18,12 @@ import cors from "cors";
 
 dotenv.config();
 const app = express();
-configureSecurityMiddleware(app);
 app.use(
   cors({
-    origin: "https://4d7f-105-113-81-163.ngrok-free.app",
+    origin: [
+      "http://localhost:3001",
+      "https://4d7f-105-113-81-163.ngrok-free.app/",
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -31,6 +33,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+configureSecurityMiddleware(app);
 
 app.use("/api/auth", authRoute);
 app.use("/api/members", memberRoute);

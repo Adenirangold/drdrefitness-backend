@@ -203,7 +203,7 @@ export const forgotPassword = async (
     }
     res.status(200).json({
       status: "success",
-      message: `Reset token sent `,
+      message: `Password reset token sent to ${existingMember.email} `,
     });
   } catch (error) {
     next(error);

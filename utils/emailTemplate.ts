@@ -11,7 +11,7 @@ Hello ${name},
 
 We received a request to reset your password. If you didn't request this, please ignore this email. Otherwise, click the link below to reset your password:
 
-  http://localhost:3000/reset-password/${resetToken}
+  ${process.env.FRONT_END_URL}/reset-password/${resetToken}
 
 This link will expire in 10 minutes for security reasons. After that, you will need to request another reset.
 
@@ -86,7 +86,7 @@ Thank you.
               <p>We received a request to reset your password for your Drdrefitness account. If you didn't make this request, you can safely ignore this email.</p>
               
               <div style="text-align: center;">
-                  <a href="http://localhost:3000/reset-password/${resetToken}" class="button">Reset Password</a>
+                  <a href="${process.env.FRONT_END_URL}/reset-password/${resetToken}" class="button">Reset Password</a>
               </div>
               
               <div class="note">
