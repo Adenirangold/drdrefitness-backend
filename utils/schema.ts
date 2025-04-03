@@ -92,7 +92,13 @@ export const emailAloneSchema = memberSchema.innerType().pick({
   email: true,
 });
 
-export const memberUpdateSchema = memberSchema.innerType().partial();
+export const memberUpdateSchema = memberSchema
+  .innerType()
+  .extend({
+    emergencyContact: emergencyContactSchema.partial().optional(),
+    address: addressSchema.partial().optional(),
+  })
+  .partial();
 
 export const passwordUpdateSchema = memberSchema
   .innerType()
