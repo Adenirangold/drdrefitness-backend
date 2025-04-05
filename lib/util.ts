@@ -119,3 +119,18 @@ export const formatDate = (dateString: Date) => {
     })
     .replace(/ /g, ",");
 };
+
+export const flattenObject = (
+  obj: Record<string, any>,
+  prefix = ""
+): Record<string, any> => {
+  const result: Record<string, any> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      Object.assign(result, flattenObject(value, `${prefix}${key}.`));
+    } else {
+      result[`${prefix}${key}`] = value;
+    }
+  }
+  return result;
+};

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import Member from "../models/member";
 import AppError from "../utils/AppError";
-import { comparePasswords, hashPassword } from "../lib/util";
+import { comparePasswords, flattenObject, hashPassword } from "../lib/util";
 import Plan from "../models/plan";
 import { paystackInitializePayment } from "../config/paystack";
 
@@ -66,10 +66,15 @@ export const updateMember = async (
         )
       );
     }
-    const updatedMember = await Member.findByIdAndUpdate(member._id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const updateData = flattenObject(req.body);
+    const updatedMember = await Member.findByIdAndUpdate(
+      member._id,
+      { $set: updateData },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!updatedMember) {
       return next(new AppError("Member does not exist", 404));
     }

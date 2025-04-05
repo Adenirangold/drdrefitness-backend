@@ -40,11 +40,12 @@ export const reactivateSubscription = async (
     const updatedMember = await Member.findByIdAndUpdate(
       req.user._id,
       {
-        currentSubscription: {
-          transactionReference: paymentResponse.data.data.reference,
-          plan: existingPlan._id,
-          startDate: req.body.startDate,
-          subscriptionStatus: "inactive",
+        $set: {
+          "currentSubscription.transactionReference":
+            paymentResponse.data.data.reference,
+          "currentSubscription.plan": existingPlan._id,
+          "currentSubscription.startDate": req.body.startDate,
+          "currentSubscription.subscriptionStatus": "inactive",
         },
       },
       {
