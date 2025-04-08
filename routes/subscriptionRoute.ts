@@ -1,6 +1,6 @@
 import express from "express";
 import validateRequest from "../middleware/validation";
-import { currentSubscriptionSchema } from "../utils/schema";
+import { reactivateSubscriptionSchema } from "../utils/schema";
 import {
   cancelSubscription,
   confirmSubscriptionPayment,
@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.patch(
   "/",
-  validateRequest(currentSubscriptionSchema),
+  validateRequest(reactivateSubscriptionSchema),
   autheticateMember("member"),
   reactivateSubscription
 );

@@ -20,7 +20,14 @@ export const reactivateSubscription = async (
       return next(new AppError("Unauthorised", 401));
     }
 
-    const existingPlan = await Plan.findById(req.body.plan);
+    const { planType, name, gymLocation, gymBranch } = req.body;
+
+    const existingPlan = await Plan.findOne({
+      planType,
+      name,
+      gymLocation,
+      gymBranch,
+    });
     if (!existingPlan) {
       return next(
         new AppError("Plan for this subscription no longer exist", 404)
@@ -44,7 +51,7 @@ export const reactivateSubscription = async (
           "currentSubscription.transactionReference":
             paymentResponse.data.data.reference,
           "currentSubscription.plan": existingPlan._id,
-          "currentSubscription.startDate": req.body.startDate,
+          "currentSubscription.startDate": new Date(),
           "currentSubscription.subscriptionStatus": "inactive",
         },
       },
