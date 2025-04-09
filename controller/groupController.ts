@@ -51,7 +51,6 @@ export const sendGroupInvitation = async (
     }
 
     const token = getJWTToken({ email: req.body.email });
-    console.log(token);
 
     const result = await sendGroupInvitationEmail({
       inviterName: `${member.firstName}${" "}${member.lastName}`,
@@ -60,7 +59,7 @@ export const sendGroupInvitation = async (
       planEndDate: member.currentSubscription.endDate,
       planLocation: plan.gymLocation,
       planBranch: plan.gymBranch,
-      inviteLink: `/local/${member.groupSubscription.groupInviteToken}/${token}`,
+      inviteLink: `${process.env.FRONT_END_URL}/member/accept-member/${member.groupSubscription.groupInviteToken}/${token}`,
     });
 
     if (!result) {

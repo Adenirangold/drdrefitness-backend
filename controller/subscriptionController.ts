@@ -34,6 +34,39 @@ export const reactivateSubscription = async (
       );
     }
 
+    const isNotGroup = existingPlan.planType === "individual";
+
+    const currentPlanId =
+      currentMember?.currentSubscription?.plan?._id?.toString();
+    const newPlanId = existingPlan._id.toString();
+    const isSamePlan = currentPlanId === newPlanId;
+
+    let update: any = {
+      $set: {
+        "currentSubscription.transactionReference": "",
+        "currentSubscription.plan": existingPlan._id,
+        "currentSubscription.startDate": new Date(),
+        "currentSubscription.subscriptionStatus": "inactive",
+      },
+    };
+
+    if (isNotGroup) {
+      update.$set = {
+        ...update.$set,
+        isGroup: false,
+        groupRole: "none",
+      };
+      update.$unset = {
+        groupSubscription: "",
+      };
+    } else if (!isSamePlan && !isNotGroup) {
+      update.$set = {
+        ...update.$set,
+        isGroup: true,
+        "groupSubscription.dependantMembers": [],
+      };
+    }
+
     const paymentResponse = await paystackInitializePayment(
       req.user.email,
       existingPlan.price,
@@ -44,22 +77,13 @@ export const reactivateSubscription = async (
       }
     );
 
-    const updatedMember = await Member.findByIdAndUpdate(
-      req.user._id,
-      {
-        $set: {
-          "currentSubscription.transactionReference":
-            paymentResponse.data.data.reference,
-          "currentSubscription.plan": existingPlan._id,
-          "currentSubscription.startDate": new Date(),
-          "currentSubscription.subscriptionStatus": "inactive",
-        },
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    update.$set["currentSubscription.transactionReference"] =
+      paymentResponse.data.data.reference;
+
+    const updatedMember = await Member.findByIdAndUpdate(req.user._id, update, {
+      new: true,
+      runValidators: true,
+    });
 
     res.status(200).json({
       status: "success",
@@ -72,6 +96,7 @@ export const reactivateSubscription = async (
     next(error);
   }
 };
+
 export const confirmSubscriptionPayment = async (
   req: Request,
   res: Response,
@@ -92,6 +117,7 @@ export const confirmSubscriptionPayment = async (
     "currentSubscription.transactionReference": reference,
   }).populate("currentSubscription.plan");
 
+  const plan = await Plan.findById(member?.currentSubscription?.plan);
   if (!member) {
     return next(new AppError("Member not found", 404));
   }
@@ -109,8 +135,6 @@ export const confirmSubscriptionPayment = async (
   };
 
   await member.save();
-
-  const plan = await Plan.findById(member.currentSubscription.plan);
 
   await sendSubscriptionEmail(
     "adeniranbayogold@gmail.com",

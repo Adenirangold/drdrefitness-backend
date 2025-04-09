@@ -39,8 +39,8 @@ app.use("/api/auth", authRoute);
 app.use("/api/members", memberRoute);
 app.use("/api/plans", planRoute);
 app.use("/api/admin", adminRoute);
-app.use("/api/subscription", subscriptionRoute);
-app.use("/api/group-subscription", groupRoute);
+app.use("/api/members/subscription", subscriptionRoute);
+app.use("/api/members/group-subscription", groupRoute);
 app.use("/api/paystack", paystackRoute);
 app.use("/api/workflow", workflowRoute);
 
