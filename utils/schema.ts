@@ -61,19 +61,25 @@ export const memberSchema = z
     { message: "Admin location is required for admin role" }
   );
 
-export const groupMemberSchema = memberSchema.innerType().pick({
-  email: true,
-  password: true,
-  firstName: true,
-  lastName: true,
-  phoneNumber: true,
-  address: true,
-  emergencyContact: true,
-  healthInfo: true,
-  gender: true,
-  dateOfBirth: true,
-  profilePicture: true,
-});
+export const groupMemberSchema = memberSchema
+  .innerType()
+  .pick({
+    email: true,
+    password: true,
+    firstName: true,
+    lastName: true,
+    phoneNumber: true,
+    address: true,
+    emergencyContact: true,
+    healthInfo: true,
+    gender: true,
+    dateOfBirth: true,
+    profilePicture: true,
+  })
+  .partial()
+  .extend({
+    email: z.string().email(),
+  });
 export const adminSchema = memberSchema.innerType().pick({
   email: true,
   password: true,

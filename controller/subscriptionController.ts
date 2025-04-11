@@ -20,6 +20,30 @@ export const reactivateSubscription = async (
       return next(new AppError("Unauthorised", 401));
     }
 
+    if (
+      currentMember.isGroup &&
+      currentMember.groupRole === "dependant" &&
+      currentMember.groupSubscription?.primaryMember
+    ) {
+      const primaryMemberId =
+        currentMember.groupSubscription.primaryMember.toString();
+
+      const updatedPrimary = await Member.findOneAndUpdate(
+        { _id: primaryMemberId },
+        {
+          $pull: {
+            "groupSubscription.dependantMembers": { member: currentMember._id },
+          },
+        },
+        { new: true }
+      );
+      if (!updatedPrimary) {
+        console.warn(
+          `Primary member ${primaryMemberId} not found or update failed`
+        );
+      }
+    }
+
     const { planType, name, gymLocation, gymBranch } = req.body;
 
     const existingPlan = await Plan.findOne({

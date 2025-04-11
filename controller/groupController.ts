@@ -51,16 +51,48 @@ export const sendGroupInvitation = async (
       return next(new AppError("Invalid subscription plan", 400));
     }
 
+    const dependantMember = await Member.findOne({
+      email: req.body.email,
+    });
+
+    const isAlreadyMember = !!dependantMember;
+    if (dependantMember) {
+      if (
+        dependantMember.isGroup &&
+        dependantMember.groupRole === "primary" &&
+        (dependantMember.groupSubscription?.dependantMembers?.length ?? 0) > 0
+      ) {
+        return next(
+          new AppError("Cannot invite a primary member with dependants", 400)
+        );
+      }
+      if (
+        dependantMember.isGroup &&
+        dependantMember.groupRole === "dependant" &&
+        dependantMember.groupSubscription?.primaryMember?.toString() !==
+          member._id.toString()
+      ) {
+        return next(
+          new AppError("Member is already a dependant in another group", 400)
+        );
+      }
+    }
+
     const token = getJWTToken({ email: req.body.email });
 
     const result = await sendGroupInvitationEmail({
       inviterName: `${member.firstName}${" "}${member.lastName}`,
-      inviteeEmail: req.body.email,
+      // inviteeEmail: req.body.email,
+      inviteeEmail: "adeniranbayogold@gmail.com",
       planName: plan.name,
       planEndDate: member.currentSubscription.endDate,
       planLocation: plan.gymLocation,
       planBranch: plan.gymBranch,
-      inviteLink: `${process.env.FRONT_END_URL}/member/accept-member/${member.groupSubscription.groupInviteToken}/${token}`,
+      inviteLink: `${
+        isAlreadyMember
+          ? `${process.env.FRONT_END_URL}/member/accept-member/${member.groupSubscription.groupInviteToken}/${token}`
+          : `${process.env.FRONT_END_URL}/member/accept-new-member/${member.groupSubscription.groupInviteToken}/${token}`
+      }`,
     });
 
     if (!result) {
@@ -86,11 +118,12 @@ export const acceptGroupInvitation = async (
     const decodedToken = verifyToken(req.params.id!);
 
     if (decodedToken?.email !== req.body.email) {
-      return next(new AppError("Unanthorised to join group", 401));
+      return next(new AppError("Unauthorized to join group", 401));
     }
+
     const primaryMember = await Member.findOne({
       "groupSubscription.groupInviteToken": req.params.token,
-    });
+    }).populate("currentSubscription.plan");
     if (!primaryMember) {
       return next(new AppError("No primary member found", 401));
     }
@@ -104,32 +137,49 @@ export const acceptGroupInvitation = async (
       );
     }
 
-    let dependentMember = await Member.findOne({ email: req.body.email });
+    let dependantMember = await Member.findOne({ email: req.body.email });
 
-    if (dependentMember) {
-      if (dependentMember.isGroup && dependentMember.groupRole === "primary") {
+    const subscription = {
+      plan: primaryMember.currentSubscription?.plan,
+      subscriptionStatus:
+        primaryMember.currentSubscription?.subscriptionStatus || "active",
+      startDate: primaryMember.currentSubscription?.startDate || new Date(),
+      endDate: primaryMember.currentSubscription?.endDate,
+      autoRenew: primaryMember.currentSubscription?.autoRenew || false,
+      paymentMethod: primaryMember.currentSubscription?.paymentMethod,
+      paymentStatus:
+        primaryMember.currentSubscription?.paymentStatus || "approved",
+      transactionReference:
+        primaryMember.currentSubscription?.transactionReference,
+    };
+
+    if (dependantMember) {
+      if (
+        dependantMember.isGroup &&
+        dependantMember.groupRole === "primary" &&
+        (dependantMember.groupSubscription?.dependantMembers?.length ?? 0) > 0
+      ) {
         return next(
           new AppError(
-            "Primary members cannot join another group as a dependant",
+            "Primary members with dependants cannot join another group as a dependant",
             400
           )
         );
       }
       if (
-        dependentMember.isGroup &&
-        dependentMember.groupRole === "dependant" &&
-        dependentMember.groupSubscription?.primaryMember?.toString() !==
+        dependantMember.isGroup &&
+        dependantMember.groupRole === "dependant" &&
+        dependantMember.groupSubscription?.primaryMember?.toString() !==
           primaryMember._id.toString()
       ) {
         return next(
           new AppError("Member is already a dependant in another group", 400)
         );
       }
-
       if (
-        dependentMember.isGroup &&
-        dependentMember.groupRole === "dependant" &&
-        dependentMember.groupSubscription?.primaryMember?.toString() ===
+        dependantMember.isGroup &&
+        dependantMember.groupRole === "dependant" &&
+        dependantMember.groupSubscription?.primaryMember?.toString() ===
           primaryMember._id.toString()
       ) {
         return next(
@@ -140,40 +190,32 @@ export const acceptGroupInvitation = async (
         );
       }
 
-      dependentMember.isActive = true;
-      dependentMember.currentSubscription = {
-        plan: primaryMember.currentSubscription?.plan,
-        subscriptionStatus:
-          primaryMember.currentSubscription?.subscriptionStatus || "active",
-        startDate: primaryMember.currentSubscription?.startDate || new Date(),
-        endDate: primaryMember.currentSubscription?.endDate,
-        autoRenew: primaryMember.currentSubscription?.autoRenew || false,
-        paymentMethod: primaryMember.currentSubscription?.paymentMethod,
-        paymentStatus:
-          primaryMember.currentSubscription?.paymentStatus || "approved",
-        transactionReference:
-          primaryMember.currentSubscription?.transactionReference,
-      };
-      dependentMember.isGroup = true;
-      dependentMember.groupRole = "dependant";
-      dependentMember.groupSubscription = {
+      // Reset if they were a primary member with no dependants
+      if (dependantMember.isGroup && dependantMember.groupRole === "primary") {
+        dependantMember.isGroup = false;
+        dependantMember.groupRole = "none";
+        dependantMember.groupSubscription = undefined;
+      }
+
+      dependantMember.isActive = true;
+      dependantMember.currentSubscription = subscription;
+      dependantMember.isGroup = true;
+      dependantMember.groupRole = "dependant";
+      dependantMember.groupSubscription = {
         groupType: primaryMember.groupSubscription.groupType,
         primaryMember: primaryMember._id,
-        groupMaxMember: primaryMember.groupSubscription.groupMaxMember,
+        groupMaxMember:
+          primaryMember.groupSubscription.groupType === "couple" ? 2 : 4,
         dependantMembers: new mongoose.Types.DocumentArray([]),
         groupInviteToken: undefined,
       };
 
-      await dependentMember.save();
+      await dependantMember.save();
     } else {
-      dependentMember = new Member({
+      dependantMember = new Member({
         ...req.body,
         isActive: true,
-        currentSubscription: {
-          ...primaryMember.currentSubscription,
-          transactionReference:
-            primaryMember.currentSubscription?.transactionReference,
-        },
+        currentSubscription: subscription,
         isGroup: true,
         groupRole: "dependant",
         groupSubscription: {
@@ -182,7 +224,7 @@ export const acceptGroupInvitation = async (
         },
       });
 
-      await dependentMember.save();
+      await dependantMember.save();
     }
 
     const updatedPrimaryMember = await Member.findOneAndUpdate(
@@ -190,7 +232,7 @@ export const acceptGroupInvitation = async (
       {
         $push: {
           "groupSubscription.dependantMembers": {
-            member: dependentMember._id,
+            member: dependantMember._id,
             status: "active",
             joinedAt: new Date(),
           },
@@ -207,7 +249,7 @@ export const acceptGroupInvitation = async (
 
     res.status(200).json({
       status: "success",
-      message: `Dependent member added successfully`,
+      message: "Dependant member added successfully",
     });
   } catch (error) {
     next(error);

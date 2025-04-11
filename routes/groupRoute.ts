@@ -13,6 +13,7 @@ router.post(
   autheticateMember("member"),
   groupController.sendGroupInvitation
 );
+
 router.post(
   "/:token/:id",
 
