@@ -255,3 +255,72 @@ export const acceptGroupInvitation = async (
     next(error);
   }
 };
+export const removeDependant = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const primaryMember = req.user;
+    if (!primaryMember) {
+      return next(new AppError("Unauthorized", 401));
+    }
+
+    if (!primaryMember.isGroup || primaryMember.groupRole !== "primary") {
+      return next(
+        new AppError("Only primary members can remove dependants", 403)
+      );
+    }
+
+    const dependantId = req.body.id;
+
+    const dependantExists =
+      primaryMember.groupSubscription?.dependantMembers.some(
+        (dep: any) => dep.member.toString() === dependantId
+      );
+    if (!dependantExists) {
+      return next(new AppError("Dependant not found in your group", 404));
+    }
+
+    const updatedPrimaryMember = await Member.findOneAndUpdate(
+      { _id: primaryMember._id },
+      {
+        $pull: {
+          "groupSubscription.dependantMembers": { member: dependantId },
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedPrimaryMember) {
+      return next(new AppError("Failed to update primary member", 500));
+    }
+
+    const updatedDependant = await Member.findByIdAndUpdate(
+      dependantId,
+      {
+        $set: {
+          isGroup: false,
+          groupRole: "none",
+          "currentSubscription.subscriptionStatus": "inactive",
+          isActive: false,
+        },
+        $unset: {
+          groupSubscription: "",
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDependant) {
+      return next(new AppError("Failed to update dependant member", 500));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Dependant removed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};

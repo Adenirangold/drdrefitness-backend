@@ -1,6 +1,10 @@
 import express from "express";
 import validateRequest from "../middleware/validation";
-import { emailAloneSchema, groupMemberSchema } from "../utils/schema";
+import {
+  emailAloneSchema,
+  groupMemberSchema,
+  idOnlySchema,
+} from "../utils/schema";
 import * as groupController from "../controller/groupController";
 import autheticateMember from "../middleware/authentication";
 
@@ -12,6 +16,13 @@ router.post(
   validateRequest(emailAloneSchema),
   autheticateMember("member"),
   groupController.sendGroupInvitation
+);
+
+router.delete(
+  "/",
+  autheticateMember("member"),
+  validateRequest(idOnlySchema),
+  groupController.removeDependant
 );
 
 router.post(

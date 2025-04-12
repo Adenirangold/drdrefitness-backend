@@ -143,3 +143,9 @@ export const planSchema = z.object({
 
 export const reactivateSubscriptionSchema = planSchema.partial();
 export const updatePlanSchema = planSchema.omit({ planId: true }).partial();
+
+export const idOnlySchema = z.object({
+  id: z
+    .string()
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
+});
