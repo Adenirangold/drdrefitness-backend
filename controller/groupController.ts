@@ -272,7 +272,7 @@ export const removeDependant = async (
       );
     }
 
-    const dependantId = req.body.id;
+    const dependantId = req.params.id;
 
     const dependantExists =
       primaryMember.groupSubscription?.dependantMembers.some(
@@ -302,7 +302,7 @@ export const removeDependant = async (
         $set: {
           isGroup: false,
           groupRole: "none",
-          "currentSubscription.subscriptionStatus": "inactive",
+          "currentSubscription.subscriptionStatus": "cancelled",
           isActive: false,
         },
         $unset: {

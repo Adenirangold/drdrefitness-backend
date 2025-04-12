@@ -19,9 +19,8 @@ router.post(
 );
 
 router.delete(
-  "/",
+  "/:id",
   autheticateMember("member"),
-  validateRequest(idOnlySchema),
   groupController.removeDependant
 );
 
