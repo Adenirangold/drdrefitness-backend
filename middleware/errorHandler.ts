@@ -10,6 +10,11 @@ const errorHandler: ErrorRequestHandler = (
 ) => {
   let error = err;
 
+  if (err.name === "JsonWebTokenError") {
+    error = new AppError("Invalid token. Please log in again.", 401);
+    error.isOperational = true;
+  }
+
   // Mongoose CastError (Invalid ID)
   if (err.name === "CastError") {
     error = new AppError(`Invalid ${err.path}: ${err.value}`, 400);
