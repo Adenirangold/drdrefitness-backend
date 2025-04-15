@@ -53,7 +53,8 @@ export const getJWTToken = (payload: object): string => {
 export const sendAuthResponse = (
   res: Response,
   userId: Types.ObjectId,
-  email: string
+  email: string,
+  role: string
 ): void => {
   try {
     const token = getJWTToken({ id: userId.toString() });
@@ -62,6 +63,7 @@ export const sendAuthResponse = (
       id: userId.toString(),
       email,
       token,
+      role,
     };
 
     res.status(200).json({

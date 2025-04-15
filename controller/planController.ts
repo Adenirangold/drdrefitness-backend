@@ -62,6 +62,18 @@ export const getPlan = async (
   }
 };
 
+export const getPlanByAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const plan = await Plan.find({});
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const updatePlan = async (
   req: Request,
   res: Response,

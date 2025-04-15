@@ -137,7 +137,7 @@ export const verifyPaymentAndActivate = async (
       console.log("error sending mail");
     }
 
-    sendAuthResponse(res, member._id, member.email!);
+    sendAuthResponse(res, member._id, member.email!, member.role);
   } catch (error) {
     next(error);
   }
@@ -155,7 +155,9 @@ export const login = async (
     }
     const existingMember = await Member.findOne({ email });
     if (!existingMember) {
-      return next(new AppError("This user does not exist", 401));
+      return next(
+        new AppError("The member with this credential does not exist", 401)
+      );
     }
 
     const isMatch = await comparePasswords(password, existingMember.password!);
@@ -165,7 +167,12 @@ export const login = async (
       return next(new AppError("Invalid email or password", 401));
     }
 
-    sendAuthResponse(res, existingMember._id, existingMember.email!);
+    sendAuthResponse(
+      res,
+      existingMember._id,
+      existingMember.email!,
+      existingMember.role
+    );
   } catch (error) {
     next(error);
   }

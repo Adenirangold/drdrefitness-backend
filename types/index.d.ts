@@ -8,6 +8,7 @@ export interface AuthResponse {
   id: string;
   email: string;
   token?: string;
+  role?: string;
 }
 export interface TokenPayload {
   id: string;
