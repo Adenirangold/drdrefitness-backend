@@ -37,7 +37,15 @@ export const signup = async (
       );
     }
 
-    const plan = await Plan.findById(req.body.currentSubscription.plan);
+    const { planType, name, gymLocation, gymBranch } =
+      req.body.currentSubscription;
+
+    const plan = await Plan.findOne({
+      planType,
+      name,
+      gymLocation,
+      gymBranch,
+    });
 
     if (!plan) {
       return next(new AppError("Invalid subscription plan", 400));
@@ -61,7 +69,8 @@ export const signup = async (
     const newMember = new Member({
       ...req.body,
       currentSubscription: {
-        ...req.body.currentSubscription,
+        plan: plan._id,
+        stateDate: new Date(),
         transactionReference: paymentResponse.data.data.reference,
       },
       isGroup: isGroupPlan,

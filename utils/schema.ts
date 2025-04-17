@@ -21,12 +21,22 @@ const healthInfoSchema = z.object({
   allergies: z.array(z.string()).optional(),
 });
 
-export const currentSubscriptionSchema = z.object({
-  plan: z
-    .string()
-    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
+export const planSchema = z.object({
+  planId: z.string().min(2).max(50),
+  planType: z.enum(["individual", "couple", "family"]).default("individual"),
+  name: z.string().min(2).max(50),
+  gymLocation: z.string().min(2).max(50),
+  gymBranch: z.string().min(2).max(50),
+  benefits: z.array(z.string()),
+  price: z.coerce.number().positive(),
+  duration: z.coerce.number().positive(),
+});
 
-  startDate: z.coerce.date(),
+export const currentSubscriptionSchema = planSchema.pick({
+  planType: true,
+  name: true,
+  gymBranch: true,
+  gymLocation: true,
 });
 
 const adminLocationSchema = z.object({
@@ -129,17 +139,6 @@ export const passwordresetSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
-
-export const planSchema = z.object({
-  planId: z.string().min(2).max(50),
-  planType: z.enum(["individual", "couple", "family"]).default("individual"),
-  name: z.string().min(2).max(50),
-  gymLocation: z.string().min(2).max(50),
-  gymBranch: z.string().min(2).max(50),
-  benefits: z.array(z.string()),
-  price: z.coerce.number().positive(),
-  duration: z.coerce.number().positive(),
-});
 
 export const reactivateSubscriptionSchema = planSchema.partial();
 export const updatePlanSchema = planSchema.omit({ planId: true }).partial();
