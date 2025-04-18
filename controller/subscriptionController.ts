@@ -84,6 +84,8 @@ export const reactivateSubscription = async (
         "currentSubscription.plan": existingPlan._id,
         "currentSubscription.startDate": new Date(),
         "currentSubscription.subscriptionStatus": "inactive",
+        "currentSubscription.paymentMethod": undefined,
+        "currentSubscription.paymentStatus": undefined,
       },
     };
 
