@@ -90,8 +90,8 @@ export const sendGroupInvitation = async (
       planBranch: plan.gymBranch,
       inviteLink: `${
         isAlreadyMember
-          ? `${process.env.FRONT_END_URL}/member/accept-member/${member.groupSubscription.groupInviteToken}/${token}`
-          : `${process.env.FRONT_END_URL}/member/accept-new-member/${member.groupSubscription.groupInviteToken}/${token}`
+          ? `${process.env.FRONT_END_URL}/accept-member/${member.groupSubscription.groupInviteToken}/${token}`
+          : `${process.env.FRONT_END_URL}/accept-new-member/${member.groupSubscription.groupInviteToken}/${token}`
       }`,
     });
 
