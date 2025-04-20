@@ -84,8 +84,10 @@ export const reactivateSubscription = async (
         "currentSubscription.plan": existingPlan._id,
         "currentSubscription.startDate": new Date(),
         "currentSubscription.subscriptionStatus": "inactive",
-        "currentSubscription.paymentMethod": undefined,
-        "currentSubscription.paymentStatus": undefined,
+      },
+      $unset: {
+        "currentSubscription.paymentMethod": "",
+        "currentSubscription.paymentStatus": "",
       },
     };
 
@@ -96,6 +98,7 @@ export const reactivateSubscription = async (
         groupRole: "none",
       };
       update.$unset = {
+        ...update.$unset,
         groupSubscription: "",
       };
     } else if (!isSamePlan && !isNotGroup) {
@@ -112,6 +115,9 @@ export const reactivateSubscription = async (
             ? 4
             : undefined,
         "groupSubscription.dependantMembers": [],
+      };
+      update.$unset = {
+        ...update.$unset,
       };
     }
 
