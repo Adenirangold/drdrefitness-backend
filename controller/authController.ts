@@ -3,6 +3,7 @@ import AppError from "../utils/AppError";
 import Member from "../models/member";
 import crypto from "crypto";
 import {
+  calculateEndDate,
   comparePasswords,
   createHashedToken,
   getJWTToken,
@@ -70,7 +71,7 @@ export const signup = async (
       ...req.body,
       currentSubscription: {
         plan: plan._id,
-        stateDate: new Date(),
+        startDate: new Date(),
         transactionReference: paymentResponse.data.data.reference,
       },
       isGroup: isGroupPlan,
