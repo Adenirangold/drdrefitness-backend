@@ -32,9 +32,13 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
       if (!decodedToken) {
         return next(new AppError("Invalid Token", 401));
       }
-      const decodedMember = await Member.findById(decodedToken.id).populate(
-        "membershipHistory.plan"
-      );
+      const decodedMember = await Member.findById(decodedToken.id)
+        .populate("membershipHistory.plan")
+        .populate({
+          path: "groupSubscription.dependantMembers.member",
+          model: "Member",
+          select: "firstName lastName email phoneNumber",
+        });
       if (!decodedMember) {
         return next(new AppError("Member with token not found", 404));
       }

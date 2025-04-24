@@ -105,6 +105,7 @@ export const updateMemberPassword = async (
     const currentPassword = await Member.findById(member._id).select(
       "password"
     );
+
     if (!currentPassword) {
       return next(new AppError("Member does not exist", 404));
     }
@@ -130,6 +131,8 @@ export const updateMemberPassword = async (
         runValidators: true,
       }
     );
+
+    console.log(updateMember);
 
     res.status(200).json({
       status: "success",

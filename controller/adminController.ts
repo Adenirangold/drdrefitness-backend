@@ -74,6 +74,28 @@ export const getAdminBranchMember = async (
     const gymLocation = req.user.adminLocation.location;
     const gymBranch = req.user.adminLocation.branch;
 
+    // const members = await Member.aggregate([
+    //   {
+    //     $lookup: {
+    //       from: "plans",
+    //       localField: "currentSubscription.plan",
+    //       foreignField: "_id",
+    //       as: "planDetails",
+    //     },
+    //   },
+    //   {
+    //     $match: {
+    //       "planDetails.gymLocation": gymLocation,
+    //       "planDetails.gymBranch": gymBranch,
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       planDetails: 0,
+    //     },
+    //   },
+    // ]);
+
     const members = await Member.aggregate([
       {
         $lookup: {
@@ -91,7 +113,33 @@ export const getAdminBranchMember = async (
       },
       {
         $project: {
-          planDetails: 0,
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+          phoneNumber: 1,
+          "currentSubscription.startDate": 1,
+          "currentSubscription.endDate": 1,
+          "currentSubscription.subscriptionStatus": 1,
+          "currentSubscription.plan": {
+            $arrayElemAt: [
+              {
+                $map: {
+                  input: "$planDetails",
+                  as: "plan",
+                  in: {
+                    name: "$$plan.name",
+                    planType: "$$plan.planType",
+                    duration: "$$plan.duration",
+                    price: "$$plan.price",
+                  },
+                },
+              },
+              0,
+            ],
+          },
+          isGroup: 1,
+          groupRole: 1,
+          regNumber: 1,
         },
       },
     ]);

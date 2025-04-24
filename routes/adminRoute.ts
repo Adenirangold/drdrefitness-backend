@@ -21,6 +21,4 @@ router.get(
   adminController.getAdminBranchMember
 );
 
-// router.post("/subscription",su)
-
 export default router;
