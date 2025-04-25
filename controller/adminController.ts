@@ -74,56 +74,7 @@ export const getAdminBranchMember = async (
     const gymLocation = req.user.adminLocation.location;
     const gymBranch = req.user.adminLocation.branch;
 
-    // const members = await Member.aggregate([
-    //   {
-    //     $lookup: {
-    //       from: "plans",
-    //       localField: "currentSubscription.plan",
-    //       foreignField: "_id",
-    //       as: "planDetails",
-    //     },
-    //   },
-    //   {
-    //     $match: {
-    //       "planDetails.gymLocation": gymLocation,
-    //       "planDetails.gymBranch": gymBranch,
-    //     },
-    //   },
-    //   {
-    //     $project: {
-    //       firstName: 1,
-    //       lastName: 1,
-    //       email: 1,
-    //       phoneNumber: 1,
-    //       "currentSubscription.startDate": 1,
-    //       "currentSubscription.endDate": 1,
-    //       "currentSubscription.subscriptionStatus": 1,
-    //       "currentSubscription.plan": {
-    //         $arrayElemAt: [
-    //           {
-    //             $map: {
-    //               input: "$planDetails",
-    //               as: "plan",
-    //               in: {
-    //                 name: "$$plan.name",
-    //                 planType: "$$plan.planType",
-    //                 duration: "$$plan.duration",
-    //                 price: "$$plan.price",
-    //               },
-    //             },
-    //           },
-    //           0,
-    //         ],
-    //       },
-    //       isGroup: 1,
-    //       groupRole: 1,
-    //       regNumber: 1,
-    //     },
-    //   },
-    // ]);
-
     const members = await Member.aggregate([
-      // Lookup for currentSubscription.plan
       {
         $lookup: {
           from: "plans",
@@ -132,7 +83,7 @@ export const getAdminBranchMember = async (
           as: "currentPlanDetails",
         },
       },
-      // Lookup for membershipHistory.plan
+
       {
         $lookup: {
           from: "plans",
@@ -141,7 +92,7 @@ export const getAdminBranchMember = async (
           as: "historyPlanDetails",
         },
       },
-      // Lookup for groupSubscription.primaryMember
+
       {
         $lookup: {
           from: "members",
@@ -150,7 +101,7 @@ export const getAdminBranchMember = async (
           as: "primaryMemberDetails",
         },
       },
-      // Lookup for groupSubscription.dependantMembers.member
+
       {
         $lookup: {
           from: "members",
@@ -159,17 +110,16 @@ export const getAdminBranchMember = async (
           as: "dependantMemberDetails",
         },
       },
-      // Match members based on gymLocation and gymBranch
+
       {
         $match: {
           "currentPlanDetails.gymLocation": gymLocation,
           "currentPlanDetails.gymBranch": gymBranch,
         },
       },
-      // Shape the output with computed fields
+
       {
         $project: {
-          // Include all fields by default
           _id: 1,
           regNumber: 1,
           firstName: 1,
