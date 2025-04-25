@@ -91,56 +91,244 @@ export const getAdminBranchMember = async (
     //   },
     //   {
     //     $project: {
-    //       planDetails: 0,
+    //       firstName: 1,
+    //       lastName: 1,
+    //       email: 1,
+    //       phoneNumber: 1,
+    //       "currentSubscription.startDate": 1,
+    //       "currentSubscription.endDate": 1,
+    //       "currentSubscription.subscriptionStatus": 1,
+    //       "currentSubscription.plan": {
+    //         $arrayElemAt: [
+    //           {
+    //             $map: {
+    //               input: "$planDetails",
+    //               as: "plan",
+    //               in: {
+    //                 name: "$$plan.name",
+    //                 planType: "$$plan.planType",
+    //                 duration: "$$plan.duration",
+    //                 price: "$$plan.price",
+    //               },
+    //             },
+    //           },
+    //           0,
+    //         ],
+    //       },
+    //       isGroup: 1,
+    //       groupRole: 1,
+    //       regNumber: 1,
     //     },
     //   },
     // ]);
 
     const members = await Member.aggregate([
+      // Lookup for currentSubscription.plan
       {
         $lookup: {
           from: "plans",
           localField: "currentSubscription.plan",
           foreignField: "_id",
-          as: "planDetails",
+          as: "currentPlanDetails",
         },
       },
+      // Lookup for membershipHistory.plan
+      {
+        $lookup: {
+          from: "plans",
+          localField: "membershipHistory.plan",
+          foreignField: "_id",
+          as: "historyPlanDetails",
+        },
+      },
+      // Lookup for groupSubscription.primaryMember
+      {
+        $lookup: {
+          from: "members",
+          localField: "groupSubscription.primaryMember",
+          foreignField: "_id",
+          as: "primaryMemberDetails",
+        },
+      },
+      // Lookup for groupSubscription.dependantMembers.member
+      {
+        $lookup: {
+          from: "members",
+          localField: "groupSubscription.dependantMembers.member",
+          foreignField: "_id",
+          as: "dependantMemberDetails",
+        },
+      },
+      // Match members based on gymLocation and gymBranch
       {
         $match: {
-          "planDetails.gymLocation": gymLocation,
-          "planDetails.gymBranch": gymBranch,
+          "currentPlanDetails.gymLocation": gymLocation,
+          "currentPlanDetails.gymBranch": gymBranch,
         },
       },
+      // Shape the output with computed fields
       {
         $project: {
+          // Include all fields by default
+          _id: 1,
+          regNumber: 1,
           firstName: 1,
           lastName: 1,
           email: 1,
           phoneNumber: 1,
-          "currentSubscription.startDate": 1,
-          "currentSubscription.endDate": 1,
-          "currentSubscription.subscriptionStatus": 1,
-          "currentSubscription.plan": {
-            $arrayElemAt: [
-              {
-                $map: {
-                  input: "$planDetails",
-                  as: "plan",
-                  in: {
-                    name: "$$plan.name",
-                    planType: "$$plan.planType",
-                    duration: "$$plan.duration",
-                    price: "$$plan.price",
+          dateOfBirth: 1,
+          gender: 1,
+          profilePicture: 1,
+          address: 1,
+          emergencyContact: 1,
+          healthInfo: 1,
+          adminLocation: 1,
+          isActive: 1,
+          registrationDate: 1,
+          currentSubscription: {
+            plan: {
+              $arrayElemAt: [
+                {
+                  $map: {
+                    input: "$currentPlanDetails",
+                    as: "plan",
+                    in: {
+                      name: "$$plan.name",
+                      planType: "$$plan.planType",
+                      duration: "$$plan.duration",
+                      price: "$$plan.price",
+                    },
                   },
                 },
+                0,
+              ],
+            },
+            subscriptionStatus: "$currentSubscription.subscriptionStatus",
+            startDate: "$currentSubscription.startDate",
+            endDate: "$currentSubscription.endDate",
+            autoRenew: "$currentSubscription.autoRenew",
+            paymentMethod: "$currentSubscription.paymentMethod",
+            paymentStatus: "$currentSubscription.paymentStatus",
+            transactionReference: "$currentSubscription.transactionReference",
+          },
+          membershipHistory: {
+            $map: {
+              input: "$membershipHistory",
+              as: "history",
+              in: {
+                plan: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$historyPlanDetails",
+                        as: "plan",
+                        cond: { $eq: ["$$plan._id", "$$history.plan"] },
+                      },
+                    },
+                    0,
+                  ],
+                },
+                startDate: "$$history.startDate",
+                endDate: "$$history.endDate",
               },
-              0,
-            ],
+            },
           },
           isGroup: 1,
           groupRole: 1,
-          regNumber: 1,
+          groupSubscription: {
+            groupType: "$groupSubscription.groupType",
+            groupMaxMember: "$groupSubscription.groupMaxMember",
+            primaryMember: {
+              $arrayElemAt: [
+                {
+                  $map: {
+                    input: "$primaryMemberDetails",
+                    as: "member",
+                    in: {
+                      firstName: "$$member.firstName",
+                      lastName: "$$member.lastName",
+                      email: "$$member.email",
+                      phoneNumber: "$$member.phoneNumber",
+                    },
+                  },
+                },
+                0,
+              ],
+            },
+            dependantMembers: {
+              $map: {
+                input: "$groupSubscription.dependantMembers",
+                as: "dep",
+                in: {
+                  member: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$dependantMemberDetails",
+                          as: "member",
+                          cond: { $eq: ["$$member._id", "$$dep.member"] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                  status: "$$dep.status",
+                  joinedAt: "$$dep.joinedAt",
+                },
+              },
+            },
+          },
+          createdAt: 1,
+          updatedAt: 1,
         },
+      },
+      // Clean up nested fields
+      {
+        $addFields: {
+          membershipHistory: {
+            $map: {
+              input: "$membershipHistory",
+              as: "history",
+              in: {
+                plan: {
+                  name: "$$history.plan.name",
+                  planType: "$$history.plan.planType",
+                  duration: "$$history.plan.duration",
+                  price: "$$history.plan.price",
+                },
+                startDate: "$$history.startDate",
+                endDate: "$$history.endDate",
+              },
+            },
+          },
+          "groupSubscription.dependantMembers": {
+            $map: {
+              input: "$groupSubscription.dependantMembers",
+              as: "dep",
+              in: {
+                member: {
+                  firstName: "$$dep.member.firstName",
+                  lastName: "$$dep.member.lastName",
+                  email: "$$dep.member.email",
+                  phoneNumber: "$$dep.member.phoneNumber",
+                },
+                status: "$$dep.status",
+                joinedAt: "$$dep.joinedAt",
+              },
+            },
+          },
+        },
+      },
+      // Exclude sensitive fields
+      {
+        $unset: [
+          "password",
+          "passwordResetToken",
+          "passwordExpiredAt",
+          "role",
+          "__v",
+          "groupSubscription.groupInviteToken",
+        ],
       },
     ]);
 
