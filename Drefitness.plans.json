@@ -1,0 +1,153 @@
+[{
+  "_id": {
+    "$oid": "67d19044aa1d17317dc3c4f2"
+  },
+  "planId": "6567dedfcghn464ff878",
+  "name": "monthly",
+  "planType": "couple",
+  "gymLocation": "ilorin",
+  "gymBranch": "gra",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 20000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67d1935f4f6e0dccb8277e77"
+  },
+  "planId": "6567dedfcghn464ff879",
+  "name": "monthly",
+  "planType": "family",
+  "gymLocation": "ilorin",
+  "gymBranch": "gra",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 60000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67d193764f6e0dccb8277e7d"
+  },
+  "planId": "6567dedfcghn464ff876",
+  "name": "monthly",
+  "planType": "individual",
+  "gymLocation": "ilorin",
+  "gymBranch": "gra",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 35000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43a04e799038c6c56eb3a"
+  },
+  "planId": "6567dedfcthn464ff879",
+  "name": "monthly",
+  "planType": "family",
+  "gymLocation": "ilorin",
+  "gymBranch": "tanke",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 60000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43a1fe799038c6c56eb3e"
+  },
+  "planId": "6567dedfcthew464ff879",
+  "name": "monthly",
+  "planType": "couple",
+  "gymLocation": "ilorin",
+  "gymBranch": "tanke",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 35000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43a3ce799038c6c56eb42"
+  },
+  "planId": "6567dedfct45464ff879",
+  "name": "monthly",
+  "planType": "individual",
+  "gymLocation": "ilorin",
+  "gymBranch": "tanke",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 20000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43a8de799038c6c56eb46"
+  },
+  "planId": "6567dedfc823464ff879",
+  "name": "monthly",
+  "planType": "individual",
+  "gymLocation": "abuja",
+  "gymBranch": "wuse",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 20000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43aace799038c6c56eb4a"
+  },
+  "planId": "6567dedfc823464ff2679",
+  "name": "monthly",
+  "planType": "couple",
+  "gymLocation": "abuja",
+  "gymBranch": "wuse",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 35000,
+  "duration": 30,
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "67f43ac5e799038c6c56eb4e"
+  },
+  "planId": "6567dedfc82346478ff2679",
+  "name": "monthly",
+  "planType": "family",
+  "gymLocation": "abuja",
+  "gymBranch": "wuse",
+  "benefits": [
+    "2hours in bed",
+    "four women with big ass"
+  ],
+  "price": 60000,
+  "duration": 30,
+  "__v": 0
+}]

@@ -15,6 +15,7 @@ import errorHandler from "./middleware/errorHandler";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import { seedDatabase } from "./seed";
 
 dotenv.config();
 const app = express();
@@ -50,3 +51,4 @@ connectDatabase();
 app.listen(process.env.PORT, async () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
+// seedDatabase();

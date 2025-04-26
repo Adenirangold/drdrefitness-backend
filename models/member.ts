@@ -10,7 +10,7 @@ const counterSchema = new mongoose.Schema({
   count: { type: Number, default: 0 },
 });
 
-const Counter = mongoose.model("Counter", counterSchema);
+export const Counter = mongoose.model("Counter", counterSchema);
 
 const memberSchema = new Schema(
   {
