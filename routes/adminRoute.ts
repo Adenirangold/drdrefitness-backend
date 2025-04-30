@@ -11,8 +11,7 @@ const router = express.Router();
 router.post(
   "/",
   validateRequest(adminSchema),
-  // autheticateMember("director"),
-  // autheticateMember("member"),
+  autheticateMember("director"),
   adminController.createAdmin
 );
 
