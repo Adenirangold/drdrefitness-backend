@@ -7,8 +7,14 @@ export const createPlan = async (
   res: Response,
   next: NextFunction
 ) => {
+  const { planType, name, gymLocation, gymBranch } = req.body;
   try {
-    const existingPlan = await Plan.findOne({ planId: req.body.planId });
+    const existingPlan = await Plan.findOne({
+      name,
+      gymLocation,
+      gymBranch,
+      planType,
+    });
 
     if (existingPlan) {
       return next(new AppError("plan already exist", 409));

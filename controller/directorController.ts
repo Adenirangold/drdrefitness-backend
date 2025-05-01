@@ -231,3 +231,23 @@ export const getMember = async (
     next(error);
   }
 };
+
+export const getAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const admin = await Member.find({ role: "admin" }).select("-password");
+    if (!admin) {
+      return next(new AppError("No admin found", 401));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: admin || [],
+    });
+  } catch (err) {
+    next(err);
+  }
+};

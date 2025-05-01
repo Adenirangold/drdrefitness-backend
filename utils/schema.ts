@@ -22,7 +22,6 @@ const healthInfoSchema = z.object({
 });
 
 export const planSchema = z.object({
-  planId: z.string().min(2).max(50),
   planType: z.enum(["individual", "couple", "family"]).default("individual"),
   name: z.string().min(2).max(50),
   gymLocation: z.string().min(2).max(50),
@@ -136,7 +135,7 @@ export const passwordresetSchema = z
   });
 
 export const reactivateSubscriptionSchema = planSchema.partial();
-export const updatePlanSchema = planSchema.omit({ planId: true }).partial();
+export const updatePlanSchema = planSchema.partial();
 
 export const idOnlySchema = z.object({
   id: z

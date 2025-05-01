@@ -22,11 +22,13 @@ export const createAdmin = async (
 
     const existingAdmin = await Member.findOne({
       email: req.body.email,
+      "adminLocation.branch": req.body.adminLoaction.branch,
+      "adminLocation.location": req.body.adminLoaction.location,
     }).select("email");
     if (existingAdmin) {
       return next(
         new AppError(
-          "Email already registered. Please use a different email address",
+          "Admin for this location and branch already exist. Please use a different credentials(email,branch,location)",
           409
         )
       );
