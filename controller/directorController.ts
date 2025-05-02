@@ -258,6 +258,39 @@ export const updateAdmin = async (
   next: NextFunction
 ) => {
   try {
+    const updatedAdmin = await Member.findByIdAndUpdate(req.params.id, {
+      ...req.body,
+    });
+
+    if (!updatedAdmin) {
+      return next(new AppError("No admin found", 401));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "updated admin sucessfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const plan = await Member.findByIdAndDelete(req.params.id);
+
+    if (!plan) {
+      return next(new AppError("Admin not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Admin deleted successfully",
+    });
   } catch (err) {
     next(err);
   }

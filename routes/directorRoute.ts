@@ -1,7 +1,7 @@
 import express from "express";
 
 import validateRequest from "../middleware/validation";
-import { adminSchema } from "../utils/schema";
+import { updateAdminSchema } from "../utils/schema";
 import * as directorController from "../controller/directorController";
 
 import autheticateMember from "../middleware/authentication";
@@ -15,9 +15,15 @@ router.get(
   directorController.getAdmin
 );
 router.patch(
-  "/admin",
+  "/admin/:id",
   autheticateMember("director"),
-  directorController.getAdmin
+  validateRequest(updateAdminSchema),
+  directorController.updateAdmin
+);
+router.delete(
+  "/admin/:id",
+  autheticateMember("director"),
+  directorController.deleteAdmin
 );
 
 export default router;

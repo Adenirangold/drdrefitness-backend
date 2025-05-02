@@ -136,6 +136,7 @@ export const passwordresetSchema = z
 
 export const reactivateSubscriptionSchema = planSchema.partial();
 export const updatePlanSchema = planSchema.partial();
+export const updateAdminSchema = adminSchema.partial();
 
 export const idOnlySchema = z.object({
   id: z

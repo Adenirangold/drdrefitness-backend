@@ -299,7 +299,7 @@ const memberSchema = new Schema(
 memberSchema.pre("save", async function (next) {
   const member = this;
 
-  if (!member.isNew) return next();
+  if (!member.isNew && member.role !== "member") return next();
 
   try {
     const counter = await Counter.findOneAndUpdate(
