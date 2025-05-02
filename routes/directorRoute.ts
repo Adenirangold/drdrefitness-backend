@@ -14,5 +14,10 @@ router.get(
   autheticateMember("director"),
   directorController.getAdmin
 );
+router.patch(
+  "/admin",
+  autheticateMember("director"),
+  directorController.getAdmin
+);
 
 export default router;

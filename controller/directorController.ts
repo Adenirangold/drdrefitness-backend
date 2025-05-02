@@ -251,3 +251,14 @@ export const getAdmin = async (
     next(err);
   }
 };
+
+export const updateAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+  } catch (err) {
+    next(err);
+  }
+};

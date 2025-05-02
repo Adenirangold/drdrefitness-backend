@@ -22,8 +22,8 @@ export const createAdmin = async (
 
     const existingAdmin = await Member.findOne({
       email: req.body.email,
-      "adminLocation.branch": req.body.adminLoaction.branch,
-      "adminLocation.location": req.body.adminLoaction.location,
+      "adminLocation.branch": req.body.adminLocation.branch,
+      "adminLocation.location": req.body.adminLocation.location,
     }).select("email");
     if (existingAdmin) {
       return next(
