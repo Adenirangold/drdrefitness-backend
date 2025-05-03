@@ -295,3 +295,314 @@ export const deleteAdmin = async (
     next(err);
   }
 };
+
+export async function getAnalyticsData(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const results = await Member.aggregate([
+      // Match only members for relevant data
+      { $match: { role: "member" } },
+      // Lookup plan details
+      {
+        $lookup: {
+          from: "plans",
+          localField: "currentSubscription.plan",
+          foreignField: "_id",
+          as: "planDetails",
+        },
+      },
+      { $unwind: { path: "$planDetails", preserveNullAndEmptyArrays: true } },
+      // Use $facet to compute all metrics in one query
+      {
+        $facet: {
+          // 1. Active Members (Total and Per Branch)
+          activeMembers: [
+            { $match: { isActive: true } },
+            {
+              $group: {
+                _id: "$planDetails.gymBranch",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$count" },
+                byBranch: { $push: { branch: "$_id", count: "$count" } },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalActiveMembers: "$total",
+                activeMembersByBranch: {
+                  $map: {
+                    input: "$byBranch",
+                    as: "item",
+                    in: {
+                      branch: { $ifNull: ["$$item.branch", "Unknown"] },
+                      count: "$$item.count",
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          // 2. Non-Active Members (Total and Per Branch)
+          nonActiveMembers: [
+            { $match: { isActive: false } },
+            {
+              $group: {
+                _id: "$planDetails.gymBranch",
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: "$count" },
+                byBranch: { $push: { branch: "$_id", count: "$count" } },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalNonActiveMembers: "$total",
+                nonActiveMembersByBranch: {
+                  $map: {
+                    input: "$byBranch",
+                    as: "item",
+                    in: {
+                      branch: { $ifNull: ["$$item.branch", "Unknown"] },
+                      count: "$$item.count",
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          // 3. Payments for All Branches by Month
+          paymentsAllBranchesByMonth: [
+            {
+              $match: {
+                "currentSubscription.paymentStatus": "approved",
+                "currentSubscription.startDate": { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  year: { $year: "$currentSubscription.startDate" },
+                  month: { $month: "$currentSubscription.startDate" },
+                },
+                totalPayment: { $sum: "$planDetails.price" },
+              },
+            },
+            {
+              $sort: { "_id.year": 1, "_id.month": 1 },
+            },
+            {
+              $project: {
+                _id: 0,
+                year: "$_id.year",
+                month: "$_id.month",
+                totalPayment: 1,
+              },
+            },
+          ],
+          // 4. Payments for Each Branch by Month
+          paymentsByBranchByMonth: [
+            {
+              $match: {
+                "currentSubscription.paymentStatus": "approved",
+                "currentSubscription.startDate": { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  branch: "$planDetails.gymBranch",
+                  year: { $year: "$currentSubscription.startDate" },
+                  month: { $month: "$currentSubscription.startDate" },
+                },
+                totalPayment: { $sum: "$planDetails.price" },
+              },
+            },
+            {
+              $sort: { "_id.branch": 1, "_id.year": 1, "_id.month": 1 },
+            },
+            {
+              $group: {
+                _id: "$_id.branch",
+                payments: {
+                  $push: {
+                    year: "$_id.year",
+                    month: "$_id.month",
+                    totalPayment: "$totalPayment",
+                  },
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                branch: { $ifNull: ["$_id", "Unknown"] },
+                payments: 1,
+              },
+            },
+          ],
+          // 5. Cumulative Money Made Per Year
+          cumulativeMoneyPerYear: [
+            {
+              $match: {
+                "currentSubscription.paymentStatus": "approved",
+                "currentSubscription.startDate": { $ne: null },
+              },
+            },
+            {
+              $group: {
+                _id: { year: { $year: "$currentSubscription.startDate" } },
+                totalPayment: { $sum: "$planDetails.price" },
+              },
+            },
+            {
+              $sort: { "_id.year": 1 },
+            },
+            {
+              $project: {
+                _id: 0,
+                year: "$_id.year",
+                totalPayment: 1,
+              },
+            },
+          ],
+          // 6. Cumulative Money Made in Total
+          cumulativeMoneyTotal: [
+            {
+              $match: {
+                "currentSubscription.paymentStatus": "approved",
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                totalPayment: { $sum: "$planDetails.price" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                totalCumulativePayment: "$totalPayment",
+              },
+            },
+          ],
+          // 7. Number of Branches and Locations
+          branchesAndLocations: [
+            {
+              $group: {
+                _id: null,
+                branches: { $addToSet: "$planDetails.gymBranch" },
+                locations: { $addToSet: "$planDetails.gymLocation" },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                numberOfBranches: {
+                  $size: {
+                    $filter: {
+                      input: "$branches",
+                      as: "branch",
+                      cond: { $ne: ["$$branch", null] },
+                    },
+                  },
+                },
+                numberOfLocations: {
+                  $size: {
+                    $filter: {
+                      input: "$locations",
+                      as: "location",
+                      cond: { $ne: ["$$location", null] },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+      // Unwind facet results for cleaner output
+      {
+        $project: {
+          activeMembers: { $arrayElemAt: ["$activeMembers", 0] },
+          nonActiveMembers: { $arrayElemAt: ["$nonActiveMembers", 0] },
+          paymentsAllBranchesByMonth: 1,
+          paymentsByBranchByMonth: 1,
+          cumulativeMoneyPerYear: 1,
+          cumulativeMoneyTotal: { $arrayElemAt: ["$cumulativeMoneyTotal", 0] },
+          branchesAndLocations: { $arrayElemAt: ["$branchesAndLocations", 0] },
+        },
+      },
+      // Final projection to shape the output
+      {
+        $project: {
+          activeMembers: {
+            totalActiveMembers: {
+              $ifNull: ["$activeMembers.totalActiveMembers", 0],
+            },
+            activeMembersByBranch: {
+              $ifNull: ["$activeMembers.activeMembersByBranch", []],
+            },
+          },
+          nonActiveMembers: {
+            totalNonActiveMembers: {
+              $ifNull: ["$nonActiveMembers.totalNonActiveMembers", 0],
+            },
+            nonActiveMembersByBranch: {
+              $ifNull: ["$nonActiveMembers.nonActiveMembersByBranch", []],
+            },
+          },
+          paymentsAllBranchesByMonth: 1,
+          paymentsByBranchByMonth: 1,
+          cumulativeMoneyPerYear: 1,
+          cumulativeMoneyTotal: {
+            $ifNull: ["$cumulativeMoneyTotal.totalCumulativePayment", 0],
+          },
+          branchesAndLocations: {
+            numberOfBranches: {
+              $ifNull: ["$branchesAndLocations.numberOfBranches", 0],
+            },
+            numberOfLocations: {
+              $ifNull: ["$branchesAndLocations.numberOfLocations", 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    if (!results) {
+      return next(new AppError("Unable to aggregate data", 404));
+    }
+    res.status(200).json({
+      status: "success",
+      data: results[0] || {
+        activeMembers: { totalActiveMembers: 0, activeMembersByBranch: [] },
+        nonActiveMembers: {
+          totalNonActiveMembers: 0,
+          nonActiveMembersByBranch: [],
+        },
+        paymentsAllBranchesByMonth: [],
+        paymentsByBranchByMonth: [],
+        cumulativeMoneyPerYear: [],
+        cumulativeMoneyTotal: 0,
+        branchesAndLocations: { numberOfBranches: 0, numberOfLocations: 0 },
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching analytics data:", error);
+    next(error);
+  }
+}

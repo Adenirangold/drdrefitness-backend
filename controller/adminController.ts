@@ -59,6 +59,7 @@ export const createAdmin = async (
     });
   } catch (err) {
     next(err);
+    console.log(err);
   }
 };
 

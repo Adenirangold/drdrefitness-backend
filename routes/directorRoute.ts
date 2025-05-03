@@ -14,6 +14,11 @@ router.get(
   autheticateMember("director"),
   directorController.getAdmin
 );
+router.get(
+  "/analytic",
+  autheticateMember("director"),
+  directorController.getAnalyticsData
+);
 router.patch(
   "/admin/:id",
   autheticateMember("director"),
