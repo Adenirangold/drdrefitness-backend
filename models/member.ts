@@ -5,6 +5,45 @@ import Plan from "./plan";
 
 const Schema = mongoose.Schema;
 
+const paymentLogSchema = new Schema(
+  {
+    branch: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+    transactionCount: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+    transactions: [
+      {
+        amount: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
+        transactionDate: {
+          type: Date,
+          required: true,
+          default: Date.now,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
+const PaymentLog = mongoose.model("PaymentLog", paymentLogSchema);
+
 const counterSchema = new mongoose.Schema({
   collectionName: { type: String, required: true },
   count: { type: Number, default: 0 },
@@ -415,6 +454,52 @@ memberSchema.pre("save", function (next) {
     (this as any).groupSubscription.groupMaxMember = undefined;
   }
   next();
+});
+
+memberSchema.pre("save", async function (next) {
+  console.log("entering middleware");
+  if (
+    this.role === "member" &&
+    this.isModified("currentSubscription.paymentStatus") &&
+    this.currentSubscription?.paymentStatus === "approved" &&
+    this.currentSubscription.plan &&
+    (!this.isGroup || (this.isGroup && this.groupRole === "primary"))
+  ) {
+    try {
+      console.log("entering middleware");
+
+      const plan = await Plan.findById(this.currentSubscription.plan);
+      if (plan) {
+        const transactionDate =
+          this.currentSubscription.startDate || new Date();
+        await PaymentLog.findOneAndUpdate(
+          { branch: plan.gymBranch },
+          {
+            $inc: {
+              totalAmount: plan.price,
+              transactionCount: 1,
+            },
+            $setOnInsert: {
+              branch: plan.gymBranch,
+            },
+            $push: {
+              transactions: {
+                amount: plan.price,
+                transactionDate,
+              },
+            },
+          },
+          { upsert: true, new: true }
+        );
+      }
+      console.log("done middleware");
+      next();
+    } catch (error) {
+      next();
+    }
+  } else {
+    next();
+  }
 });
 
 const Member = mongoose.model("Member", memberSchema);
