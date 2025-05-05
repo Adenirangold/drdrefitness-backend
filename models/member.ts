@@ -42,7 +42,7 @@ const paymentLogSchema = new Schema(
   { timestamps: true }
 );
 
-const PaymentLog = mongoose.model("PaymentLog", paymentLogSchema);
+export const PaymentLog = mongoose.model("PaymentLog", paymentLogSchema);
 
 const counterSchema = new mongoose.Schema({
   collectionName: { type: String, required: true },
@@ -457,7 +457,6 @@ memberSchema.pre("save", function (next) {
 });
 
 memberSchema.pre("save", async function (next) {
-  console.log("entering middleware");
   if (
     this.role === "member" &&
     this.isModified("currentSubscription.paymentStatus") &&
@@ -466,8 +465,6 @@ memberSchema.pre("save", async function (next) {
     (!this.isGroup || (this.isGroup && this.groupRole === "primary"))
   ) {
     try {
-      console.log("entering middleware");
-
       const plan = await Plan.findById(this.currentSubscription.plan);
       if (plan) {
         const transactionDate =
@@ -492,7 +489,7 @@ memberSchema.pre("save", async function (next) {
           { upsert: true, new: true }
         );
       }
-      console.log("done middleware");
+
       next();
     } catch (error) {
       next();
