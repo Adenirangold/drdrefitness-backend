@@ -282,12 +282,12 @@ const memberSchema = new Schema(
               this.groupSubscription &&
               this.groupSubscription.groupType === "couple"
             )
-              return 2;
+              return 1;
             if (
               this.groupSubscription &&
               this.groupSubscription.groupType === "family"
             )
-              return 4;
+              return 3;
           }
 
           return undefined;
