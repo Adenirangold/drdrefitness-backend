@@ -132,8 +132,6 @@ export const updateMemberPassword = async (
       }
     );
 
-    console.log(updateMember);
-
     res.status(200).json({
       status: "success",
       message: "Password updated successfully",

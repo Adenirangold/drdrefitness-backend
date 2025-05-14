@@ -57,7 +57,7 @@ export const sendAuthResponse = (
   role: string
 ): void => {
   try {
-    const token = getJWTToken({ id: userId.toString() });
+    const token = getJWTToken({ id: userId.toString(), email: email });
 
     const authResponse: AuthResponse = {
       id: userId.toString(),
@@ -65,6 +65,13 @@ export const sendAuthResponse = (
       token,
       role,
     };
+
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 29,
+    });
 
     res.status(200).json({
       status: "success",

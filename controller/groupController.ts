@@ -63,7 +63,10 @@ export const sendGroupInvitation = async (
         (dependantMember.groupSubscription?.dependantMembers?.length ?? 0) > 0
       ) {
         return next(
-          new AppError("Cannot invite a primary member with dependants", 400)
+          new AppError(
+            "Cannot invite an existing member that is in a group",
+            400
+          )
         );
       }
       if (

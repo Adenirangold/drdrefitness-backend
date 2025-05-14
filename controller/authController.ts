@@ -118,26 +118,6 @@ export const verifyPaymentAndActivate = async (
       return next(new AppError("Payment verification failed", 400));
     }
 
-    // const member = await Member.findOneAndUpdate(
-    //   { "currentSubscription.transactionReference": reference },
-    //   {
-    //     $set: {
-    //       isActive: true,
-    //       "currentSubscription.paymentMethod":
-    //         verificationResponse.payment_type || "card",
-    //       "currentSubscription.subscriptionStatus": "active",
-    //       "currentSubscription.startDate": new Date(),
-    //       "currentSubscription.paymentStatus":
-    //         verificationResponse.status === "success" ? "approved" : "declined",
-    //     },
-    //   },
-    //   { new: true }
-    // );
-
-    // if (!member) {
-    //   return next(new AppError("Member not found", 404));
-    // }
-
     const member = await Member.findOne({
       "currentSubscription.transactionReference": reference,
     });

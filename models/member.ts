@@ -405,7 +405,8 @@ memberSchema.pre("save", function (next) {
     if (
       subscription?.plan &&
       subscription?.startDate &&
-      subscription?.endDate
+      subscription?.endDate &&
+      subscription?.paymentStatus === "approved"
     ) {
       const historyEntry = {
         plan: subscription.plan,
