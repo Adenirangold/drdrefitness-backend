@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
+import http from "http";
 
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
@@ -11,15 +12,31 @@ import adminRoute from "./routes/adminRoute";
 import directorRoute from "./routes/directorRoute";
 import paystackRoute from "./routes/paystackRoute";
 import workflowRoute from "./routes/workflowRoute";
+import stationRoute from "./routes/stationRoute";
 import { configureSecurityMiddleware } from "./middleware/security";
 import errorHandler from "./middleware/errorHandler";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import { Server } from "socket.io";
 import cors from "cors";
 import { seedDatabase } from "./seed";
+import { setupSocket } from "./config/socket";
 
 dotenv.config();
 const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "http://localhost:3001",
+      "https://4d7f-105-113-81-163.ngrok-free.app/",
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  },
+});
 app.use(
   cors({
     origin: [
@@ -46,9 +63,11 @@ app.use("/api/members/subscription", subscriptionRoute);
 app.use("/api/members/group-subscription", groupRoute);
 app.use("/api/paystack", paystackRoute);
 app.use("/api/workflow", workflowRoute);
+app.use("/api/station", stationRoute);
 
 app.use(errorHandler);
 
+setupSocket(io);
 connectDatabase();
 app.listen(process.env.PORT, async () => {
   console.log(`Server running on port ${process.env.PORT}`);

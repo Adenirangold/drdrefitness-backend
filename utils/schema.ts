@@ -38,9 +38,13 @@ export const currentSubscriptionSchema = planSchema.pick({
   gymLocation: true,
 });
 
-const adminLocationSchema = z.object({
+export const adminLocationSchema = z.object({
   location: z.string().min(2).max(50),
   branch: z.string().min(2).max(50),
+});
+export const stationSchema = planSchema.pick({
+  gymBranch: true,
+  gymLocation: true,
 });
 
 export const memberSchema = z
@@ -139,6 +143,11 @@ export const updatePlanSchema = planSchema.partial();
 export const updateAdminSchema = adminSchema.partial();
 
 export const idOnlySchema = z.object({
+  id: z
+    .string()
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
+});
+export const staionSchema = z.object({
   id: z
     .string()
     .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
