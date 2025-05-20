@@ -18,8 +18,12 @@ const hasAccess = (userRole: Role, requiredRole: Role) => {
 const autheticateMember = (requiredRole: Role): RequestHandler => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const authHeader = req.headers["authorization"];
       const token =
-        req.cookies.authToken || req.headers["authorization"]?.split(" ")[1];
+        req.cookies.authToken ||
+        (authHeader?.startsWith("Bearer ")
+          ? authHeader.split(" ")[1]
+          : undefined);
 
       if (!token) {
         return next(new AppError("Unauthorized", 401));
