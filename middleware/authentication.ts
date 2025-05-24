@@ -37,6 +37,7 @@ const autheticateMember = (requiredRole: Role): RequestHandler => {
         return next(new AppError("Invalid Token", 401));
       }
       const decodedMember = await Member.findById(decodedToken.id)
+        .populate("currentSubscription.plan")
         .populate("membershipHistory.plan")
         .populate({
           path: "groupSubscription.dependantMembers.member",
