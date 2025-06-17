@@ -152,3 +152,29 @@ export const staionSchema = z.object({
     .string()
     .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
 });
+
+export const checkInOutSchema = z.object({
+  stationId: z
+    .string()
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
+
+  token: z.string(),
+});
+export const checkInOutHistorySchema = z.object({
+  memberId: z
+    .string()
+    .refine((val) => mongoose.Types.ObjectId.isValid(val), "Invalid ObjectId"),
+  history: z.array(
+    z.object({
+      checkInTime: z.coerce.date(),
+      checkOutTime: z.coerce.date().optional(),
+      stationId: z
+        .string()
+        .refine(
+          (val) => mongoose.Types.ObjectId.isValid(val),
+          "Invalid ObjectId"
+        ),
+      status: z.enum(["checked-in", "checked-out"]).default("checked-in"),
+    })
+  ),
+});

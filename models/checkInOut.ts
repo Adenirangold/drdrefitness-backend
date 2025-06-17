@@ -9,9 +9,9 @@ const checkInOutEntrySchema = new mongoose.Schema({
   checkOutTime: {
     type: Date,
   },
-  branchId: {
-    type: String,
-    required: true,
+  stationId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CheckInStation",
   },
   status: {
     type: String,
@@ -34,3 +34,5 @@ const CheckInOutHistory = mongoose.model(
   "CheckInOutHistory",
   checkInOutHistorySchema
 );
+
+export default CheckInOutHistory;

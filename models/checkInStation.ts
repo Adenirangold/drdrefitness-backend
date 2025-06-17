@@ -11,6 +11,13 @@ const checkInStationSchema = new mongoose.Schema(
       type: String,
       required: [true, "Location is required"],
     },
+    qrCodeToken: {
+      type: String,
+      unique: true,
+    },
+    qrCodeCreatedAt: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

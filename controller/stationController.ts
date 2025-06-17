@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import QRCode from "qrcode";
 import CheckInStation from "../models/checkInStation";
 import AppError from "../utils/AppError";
+import jwt, { SignOptions } from "jsonwebtoken";
 
 export const createStation = async (
   req: Request,
@@ -27,6 +28,8 @@ export const createStation = async (
     const station = new CheckInStation({
       gymLocation,
       gymBranch,
+      qrCodeToken: null,
+      qrCodeCreatedAt: null,
     });
 
     await station.save();
@@ -61,13 +64,39 @@ export const getAdminStation = async (
         new AppError("Station not found for this location and branch", 500)
       );
     }
+    const now = new Date();
+    const isExpired =
+      !station.qrCodeCreatedAt ||
+      (now.getTime() - station.qrCodeCreatedAt.getTime()) / 1000 > 30;
 
-    const qrCodeUrl = await QRCode.toDataURL(station._id.toString());
+    let token = station.qrCodeToken;
+    if (isExpired) {
+      token = jwt.sign(
+        { stationId: station._id, timestamp: now },
+        process.env.JWT_SECRET!,
+        { expiresIn: "3600000s" }
+      );
+      await CheckInStation.updateOne(
+        { _id: station._id },
+        { qrCodeToken: token, qrCodeCreatedAt: now }
+      );
+    }
+
+    // Generate QR code data URL
+
+    const qrCodeData = await QRCode.toDataURL(
+      JSON.stringify({ token, stationId: station._id })
+    );
 
     res.status(200).json({
       status: "success",
       data: {
         checkInStationId: station._id,
+        token,
+        // qrCode: qrCodeData,
+        expiresAt: new Date(
+          (station.qrCodeCreatedAt || now).getTime() + 60 * 60 * 1000
+        ),
       },
     });
   } catch (error) {
