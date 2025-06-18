@@ -5,6 +5,7 @@ const checkInOutEntrySchema = new mongoose.Schema({
     type: Date,
     required: true,
     default: Date.now,
+    expires: 90 * 24 * 60 * 60, // 90 days
   },
   checkOutTime: {
     type: Date,

@@ -74,7 +74,7 @@ export const getAdminStation = async (
       token = jwt.sign(
         { stationId: station._id, timestamp: now },
         process.env.JWT_SECRET!,
-        { expiresIn: "3600000s" }
+        { expiresIn: "3600s" }
       );
       await CheckInStation.updateOne(
         { _id: station._id },
