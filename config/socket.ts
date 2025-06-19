@@ -4,10 +4,9 @@ export const setupSocket = (io: Server) => {
   io.on("connection", (socket) => {
     console.log("Admin app connected to Socket.IO:", socket.id);
 
-    // Handle custom events or authentication if needed
-    socket.on("authenticate", (token) => {
-      // Add token verification logic here if required
-      console.log("Socket authenticated with token:", token);
+    socket.on("join-branch", (gymBranch) => {
+      socket.join(gymBranch);
+      console.log(`Socket ${socket.id} joined branch ${gymBranch}`);
     });
 
     socket.on("disconnect", () => {
@@ -15,7 +14,6 @@ export const setupSocket = (io: Server) => {
     });
   });
 
-  // Export io for use in controllers (e.g., to emit events)
   return io;
 };
 
