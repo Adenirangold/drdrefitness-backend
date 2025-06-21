@@ -90,7 +90,13 @@ export const scanMember = async (
         message: `${member.firstName} ${member.lastName} checked in at ${station.gymBranch} Branch`,
       });
 
-      res.status(200).json({ status: "success", message: "Access Granted" });
+      res
+        .status(200)
+        .json({
+          status: "success",
+          message: "Access Granted",
+          action: "check-in",
+        });
     } else {
       // Check-out: Update latest entry
       const checkOutTime = new Date();
