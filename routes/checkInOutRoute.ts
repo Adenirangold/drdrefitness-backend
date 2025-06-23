@@ -13,5 +13,10 @@ router.post(
   autheticateMember("member"),
   checkInOutController.scanMember
 );
+router.get(
+  "/checkinout/records/:gymLocation/:gymBranch",
+  autheticateMember("admin"),
+  checkInOutController.scanMember
+);
 
 export default router;

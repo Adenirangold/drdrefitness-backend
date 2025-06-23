@@ -90,13 +90,11 @@ export const scanMember = async (
         message: `${member.firstName} ${member.lastName} checked in at ${station.gymBranch} Branch`,
       });
 
-      res
-        .status(200)
-        .json({
-          status: "success",
-          message: "Access Granted",
-          action: "check-in",
-        });
+      res.status(200).json({
+        status: "success",
+        message: "Access Granted",
+        action: "check-in",
+      });
     } else {
       // Check-out: Update latest entry
       const checkOutTime = new Date();
@@ -132,5 +130,99 @@ export const scanMember = async (
     }
   } catch (error) {
     next(error);
+  }
+};
+
+export const getCheckInOutMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { gymLoaction, gymBranch } = req.params;
+    const { date } = req.query;
+
+    let dateFilter;
+    if (date) {
+      const selectedDate = new Date(date as string);
+      if (isNaN(selectedDate.getTime())) {
+        return next(new AppError("Invalid date format", 400));
+      }
+      const startOfDay = new Date(selectedDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(selectedDate.setHours(23, 59, 59, 999));
+      dateFilter = { $gte: startOfDay, $lte: endOfDay };
+    } else {
+      // Default to today
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      dateFilter = { $gte: startOfDay, $lte: endOfDay };
+    }
+
+    const records = await CheckInOutHistory.aggregate([
+      { $unwind: "$history" },
+      {
+        $lookup: {
+          from: "checkinstations",
+          localField: "history.stationId",
+          foreignField: "_id",
+          as: "station",
+        },
+      },
+      { $unwind: "$station" },
+      {
+        $match: {
+          "station.gymBranch": gymBranch,
+          "station.gymLocation": gymLoaction,
+          "history.checkInTime": dateFilter,
+        },
+      },
+      {
+        $lookup: {
+          from: "members",
+          localField: "memberId",
+          foreignField: "_id",
+          as: "member",
+        },
+      },
+      { $unwind: "$member" },
+      {
+        $project: {
+          name: { $concat: ["$member.firstName", " ", "$member.lastName"] },
+          regNumber: "$member.regNumber",
+          checkInTime: "$history.checkInTime",
+          checkOutTime: "$history.checkOutTime",
+          daysRemaining: {
+            $cond: {
+              if: "$member.currentSubscription.endDate",
+              then: {
+                $floor: {
+                  $divide: [
+                    {
+                      $subtract: [
+                        "$member.currentSubscription.endDate",
+                        new Date(),
+                      ],
+                    },
+                    1000 * 60 * 60 * 24,
+                  ],
+                },
+              },
+              else: "N/A",
+            },
+          },
+        },
+      },
+      { $sort: { checkInTime: -1 } },
+      { $limit: 50 },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: records,
+    });
+  } catch (error) {
+    next(new AppError("Server error", 500));
   }
 };
