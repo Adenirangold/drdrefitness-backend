@@ -21,6 +21,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import { seedDatabase } from "./seed";
 import { setupSocket } from "./config/socket";
+import { setupCronJobs } from "./cron/updateSubsriptionStatus";
 
 dotenv.config();
 const app = express();
@@ -67,6 +68,8 @@ app.use("/api/station", stationRoute);
 app.use("/api/checkinout", checkInOutRoute);
 
 app.use(errorHandler);
+
+setupCronJobs();
 
 export const io = setupSocket(ioServer);
 

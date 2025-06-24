@@ -6,27 +6,36 @@ const updateSubscriptionStatus = async () => {
   try {
     const now = new Date();
     // Update expired subscriptions
-    await Member.updateMany(
-      { "currentSubscription.endDate": { $lt: now } },
+    const expiredResult = await Member.updateMany(
+      {
+        "currentSubscription.endDate": { $lt: now },
+        "currentSubscription.subscriptionStatus": { $ne: "expired" },
+      },
       { $set: { "currentSubscription.subscriptionStatus": "expired" } }
     );
     // Update active subscriptions
-    await Member.updateMany(
-      { "currentSubscription.endDate": { $gte: now } },
+    const activeResult = await Member.updateMany(
+      {
+        "currentSubscription.endDate": { $gte: now },
+        "currentSubscription.subscriptionStatus": { $ne: "active" },
+      },
       { $set: { "currentSubscription.subscriptionStatus": "active" } }
     );
     console.log(
-      "Subscription statuses updated successfully at",
-      new Date().toLocaleString()
+      `Subscription statuses updated at ${new Date().toLocaleString("en-US", {
+        timeZone: "Africa/Lagos",
+      })}`
+    );
+    console.log(
+      `Expired: ${expiredResult.modifiedCount}, Active: ${activeResult.modifiedCount}`
     );
   } catch (error) {
     console.error("Error updating subscription statuses:", error);
   }
 };
 
-// Schedule the job to run daily at midnight (WAT, UTC+1)
-cron.schedule("0 0 12 24 6 *", updateSubscriptionStatus, {
-  timezone: "Africa/Lagos", // Set to WAT
-});
-
-// module.exports = { updateSubscriptionStatus };
+export function setupCronJobs() {
+  cron.schedule("0 0 * * *", updateSubscriptionStatus, {
+    timezone: "Africa/Lagos", // WAT
+  });
+}
