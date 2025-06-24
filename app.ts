@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import express, { NextFunction, Request, Response } from "express";
 import http from "http";
-
 import connectDatabase from "./config/database";
 import memberRoute from "./routes/memberRoute";
 import planRoute from "./routes/planRoute";

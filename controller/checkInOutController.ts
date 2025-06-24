@@ -139,7 +139,7 @@ export const getCheckInOutMember = async (
   next: NextFunction
 ) => {
   try {
-    const { gymLoaction, gymBranch } = req.params;
+    const { gymLocation, gymBranch } = req.params;
     const { date } = req.query;
 
     let dateFilter;
@@ -173,8 +173,8 @@ export const getCheckInOutMember = async (
       { $unwind: "$station" },
       {
         $match: {
+          "station.gymLocation": gymLocation,
           "station.gymBranch": gymBranch,
-          "station.gymLocation": gymLoaction,
           "history.checkInTime": dateFilter,
         },
       },
