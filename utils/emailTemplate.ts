@@ -193,7 +193,7 @@ export const generateWelcomeEmail = (name: string) => {
             </ul>
             
             <div style="text-align: center;">
-                <a href="http://localhost:3000/dashboard" class="button">View Your Dashboard</a>
+                <a href="${process.env.FRONT_END_URL}/dashboard" class="button">View Your Dashboard</a>
             </div>
             
             <p>If you have any questions or need assistance, don't hesitate to reach out to our support team. We're here to help you succeed!</p>
@@ -306,7 +306,7 @@ export const generateResubscriptionEmail = (
               
               <p>To view or manage your subscription, visit your personal dashboard:</p>
               <div style="text-align: center;">
-                  <a href="http://localhost:3000/dashboard" class="button">View Your Dashboard</a>
+                  <a href="${process.env.FRONT_END_URL}/dashboard" class="button">View Your Dashboard</a>
               </div>
               
               <p>If you have any questions or need assistance, our team is here to help. Don't hesitate to reach out!</p>
