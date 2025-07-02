@@ -41,6 +41,7 @@ const paymentLogSchema = new Schema(
   },
   { timestamps: true }
 );
+paymentLogSchema.index({ "transactions.transactionDate": 1 });
 
 export const PaymentLog = mongoose.model("PaymentLog", paymentLogSchema);
 
@@ -334,6 +335,15 @@ const memberSchema = new Schema(
   },
   { timestamps: true }
 );
+
+memberSchema.index({ role: 1 });
+memberSchema.index({ "currentSubscription.plan": 1 });
+memberSchema.index({ "currentSubscription.subscriptionStatus": 1 });
+memberSchema.index({ isGroup: 1, groupRole: 1 });
+memberSchema.index({ "groupSubscription.primaryMember": 1 });
+memberSchema.index({ "groupSubscription.dependantMembers.member": 1 });
+memberSchema.index({ "adminLocation.branch": 1 });
+memberSchema.index({ createdAt: -1 });
 
 memberSchema.pre("save", async function (next) {
   const member = this;
