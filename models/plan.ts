@@ -45,5 +45,15 @@ const planSchema = new Schema({
   },
 });
 
+planSchema.index({ gymBranch: 1 });
+planSchema.index({ name: 1 });
+planSchema.index({ gymLocation: 1 });
+planSchema.index({ planType: 1 });
+planSchema.index({ gymBranch: 1, gymLocation: 1 });
+planSchema.index({ gymBranch: 1, gymLocation: 1, planType: 1 });
+planSchema.index({ gymBranch: 1, gymLocation: 1, name: 1 });
+planSchema.index({ gymBranch: 1, gymLocation: 1, planType: 1, name: 1 });
+planSchema.index({ price: 1 });
+
 const Plan = mongoose.model("Plan", planSchema);
 export default Plan;
