@@ -24,5 +24,11 @@ const checkInStationSchema = new mongoose.Schema(
   }
 );
 
+checkInStationSchema.index({ gymBranch: 1 });
+checkInStationSchema.index({ gymLocation: 1 });
+checkInStationSchema.index({ qrCodeCreatedAt: 1 });
+checkInStationSchema.index({ gymBranch: 1, gymLocation: 1 });
+checkInStationSchema.index({ createdAt: -1 });
+
 const CheckInStation = mongoose.model("CheckInStation", checkInStationSchema);
 export default CheckInStation;

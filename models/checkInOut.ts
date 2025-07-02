@@ -31,7 +31,7 @@ const checkInOutHistorySchema = new mongoose.Schema({
   history: [checkInOutEntrySchema],
 });
 
-checkInOutHistorySchema.index({ "history.checkInTime": 1 });
+// checkInOutHistorySchema.index({ "history.checkInTime": 1 });
 checkInOutHistorySchema.index({ "history.status": 1 });
 checkInOutHistorySchema.index({ "history.stationId": 1 });
 checkInOutHistorySchema.index({ memberId: 1, "history.checkInTime": 1 });

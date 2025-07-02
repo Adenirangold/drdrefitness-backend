@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 
 export const setupSocket = (io: Server) => {
   io.on("connection", (socket) => {
-    console.log("Admin app connected to Socket.IO:", socket.id);
+    // console.log("Admin app connected to Socket.IO:", socket.id);
 
     socket.on("join-branch", (gymBranch) => {
       socket.join(gymBranch);
@@ -10,7 +10,7 @@ export const setupSocket = (io: Server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log("Admin app disconnected:", socket.id);
+      // console.log("Admin app disconnected:", socket.id);
     });
   });
 

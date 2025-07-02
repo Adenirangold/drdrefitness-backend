@@ -43,6 +43,10 @@ const planSchema = new Schema({
     required: true,
     min: 0,
   },
+
+  paystackPlanCode: {
+    type: String,
+  },
 });
 
 planSchema.index({ gymBranch: 1 });

@@ -205,6 +205,7 @@ const memberSchema = new Schema(
 
       startDate: Date,
       endDate: Date,
+
       autoRenew: {
         type: Boolean,
         default: function (this: { role: Role }) {
@@ -227,6 +228,8 @@ const memberSchema = new Schema(
         },
       },
       transactionReference: String,
+      authorizationCode: { type: String },
+      subscriptionCode: { type: String, index: true },
     },
 
     membershipHistory: [
