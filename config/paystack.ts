@@ -2,6 +2,7 @@ import axios from "axios";
 import AppError from "../utils/AppError";
 import { MetaData } from "../types";
 import Plan from "../models/plan";
+import exp from "constants";
 
 const paystack = axios.create({
   baseURL: process.env.PAYSTACK_URL!,
@@ -49,6 +50,11 @@ export const paystackVerifyPayment = async (reference: string) => {
       metadata,
       transaction_date,
       payment_type: authorization.channel,
+      authorization_code: authorization.authorization_code,
+      lastCardDigits: authorization.last4,
+      exp_month: authorization.exp_month,
+      exp_year: authorization.exp_year,
+      cardType: authorization.card_type,
     };
   } catch (err) {
     throw new AppError("Payment initialization failed", 500);
@@ -148,7 +154,7 @@ export async function updateExistingPlans() {
   }
 }
 
-const chargeAuthorisation = async ({
+export const chargeAuthorisation = async ({
   email,
   amount,
   authorizationCode,
@@ -162,6 +168,30 @@ const chargeAuthorisation = async ({
       email,
       amount: amount * 100,
       authorization_code: authorizationCode,
+    });
+
+    console.log(response);
+
+    return response;
+  } catch (err) {
+    throw new AppError("Failed to create Paystack plan", 500);
+  }
+};
+
+export const createSubscription = async ({
+  email,
+  planCode,
+  authorizationCode,
+}: {
+  email: string;
+  planCode: string;
+  authorizationCode: string;
+}) => {
+  try {
+    const response = await paystack.put(`/subscription`, {
+      customer: email,
+      plan: planCode,
+      authorization: authorizationCode,
     });
 
     console.log(response);

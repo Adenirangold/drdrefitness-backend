@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import axios from "axios";
 import Member from "../models/member";
 import { calculateEndDate } from "../lib/util";
+import { chargeAuthorisation } from "../config/paystack";
 
 const chargeRecurringPayments = async () => {
   const session = await mongoose.startSession();
@@ -47,20 +48,11 @@ const chargeRecurringPayments = async () => {
         continue;
       }
 
-      const response = await axios.post(
-        "https://api.paystack.co/transaction/charge_authorization",
-        {
-          email: member.email,
-          amount: plan.price * 100,
-          authorization_code: member.currentSubscription?.authorizationCode,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY!}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await chargeAuthorisation({
+        email: member.email!,
+        amount: plan.price,
+        authorizationCode: member.currentSubscription?.authorizationCode!,
+      });
 
       if (response.data.status && response.data.data.status === "success") {
         await Member.updateOne(
@@ -91,6 +83,12 @@ const chargeRecurringPayments = async () => {
         );
       }
     }
+
+    console.log(
+      `Recurring payments charged at ${new Date().toLocaleString("en-US", {
+        timeZone: "Africa/Lagos",
+      })}`
+    );
 
     await session.commitTransaction();
   } catch (error) {

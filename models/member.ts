@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Role, SubscriptionData, UserInput } from "../types";
 import { calculateEndDate, hashPassword } from "../lib/util";
 import Plan from "./plan";
+import exp from "constants";
 
 const Schema = mongoose.Schema;
 
@@ -229,6 +230,12 @@ const memberSchema = new Schema(
       },
       transactionReference: String,
       authorizationCode: { type: String },
+      cardDetails: {
+        lastDigits: String,
+        cardType: String,
+        expMonth: String,
+        expYear: String,
+      },
       subscriptionCode: { type: String, index: true },
     },
 
