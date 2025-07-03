@@ -147,3 +147,27 @@ export async function updateExistingPlans() {
     console.error("Error updating plans:", error);
   }
 }
+
+const chargeAuthorisation = async ({
+  email,
+  amount,
+  authorizationCode,
+}: {
+  email: string;
+  amount: number;
+  authorizationCode: string;
+}) => {
+  try {
+    const response = await paystack.put(`/transaction/charge_authorization`, {
+      email,
+      amount: amount * 100,
+      authorization_code: authorizationCode,
+    });
+
+    console.log(response);
+
+    return response;
+  } catch (err) {
+    throw new AppError("Failed to create Paystack plan", 500);
+  }
+};
