@@ -201,3 +201,17 @@ export const createSubscription = async ({
     throw new AppError("Failed to create Paystack plan", 500);
   }
 };
+
+export const cancelPaystackSubscription = async (subscriptionCode: string) => {
+  try {
+    const response = await paystack.post(`/subscription/disable`, {
+      code: subscriptionCode,
+    });
+
+    console.log(response);
+
+    return response;
+  } catch (err) {
+    throw new AppError("Failed to cancel Paystack subscription", 500);
+  }
+};

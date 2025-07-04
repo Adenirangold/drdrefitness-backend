@@ -13,6 +13,7 @@ import {
 import { sendResetPasswordEmail, sendWelcomeEmail } from "../config/email";
 import Plan from "../models/plan";
 import {
+  createSubscription,
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
@@ -120,7 +121,7 @@ export const verifyPaymentAndActivate = async (
 
     const member = await Member.findOne({
       "currentSubscription.transactionReference": reference,
-    });
+    }).populate("currentSubscription.plan");
 
     if (!member) {
       return next(new AppError("Member not found", 404));
@@ -135,6 +136,32 @@ export const verifyPaymentAndActivate = async (
       member.currentSubscription.startDate = new Date();
       member.currentSubscription.paymentStatus =
         verificationResponse.status === "success" ? "approved" : "declined";
+      member.currentSubscription.authorizationCode =
+        verificationResponse.authorization_code;
+      member.currentSubscription.cardDetails = {
+        lastDigits: verificationResponse.lastCardDigits,
+        expMonth: verificationResponse.exp_month,
+        expYear: verificationResponse.exp_year,
+        cardType: verificationResponse.cardType,
+      };
+    }
+
+    const plan = member.currentSubscription?.plan as any;
+
+    if (plan?.name !== "2-months") {
+      const subscriptionResponse = await createSubscription({
+        email: member.email!,
+        planCode: plan.paystackPlanCode,
+        authorizationCode: verificationResponse.authorization_code,
+      });
+
+      if (!subscriptionResponse.data.status) {
+        throw new AppError(`Failed to create subscription`, 500);
+      }
+      if (member.currentSubscription) {
+        member.currentSubscription.subscriptionCode =
+          subscriptionResponse.data.data.subscription_code;
+      }
     }
 
     // Save to trigger middleware

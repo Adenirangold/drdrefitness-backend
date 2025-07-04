@@ -3,11 +3,245 @@ import AppError from "../utils/AppError";
 import Member from "../models/member";
 import Plan from "../models/plan";
 import {
+  cancelPaystackSubscription,
+  createSubscription,
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
 import { sendSubscriptionEmail, sendWelcomeEmail } from "../config/email";
 import { createHashedToken, formatDate } from "../lib/util";
+
+// export const reactivateSubscription = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   try {
+//     const currentMember = req.user;
+//     if (!currentMember) {
+//       return next(new AppError("Unauthorised", 401));
+//     }
+
+//     if (
+//       currentMember.isGroup &&
+//       currentMember.groupRole === "dependant" &&
+//       currentMember.groupSubscription?.primaryMember
+//     ) {
+//       const primaryMemberId =
+//         currentMember.groupSubscription.primaryMember.toString();
+
+//       const updatedPrimary = await Member.findOneAndUpdate(
+//         { _id: primaryMemberId },
+//         {
+//           $pull: {
+//             "groupSubscription.dependantMembers": { member: currentMember._id },
+//           },
+//         },
+//         { new: true }
+//       );
+//       if (!updatedPrimary) {
+//         console.warn(
+//           `Primary member ${primaryMemberId} not found or update failed`
+//         );
+//       }
+//     }
+
+//     const { planType, name, gymLocation, gymBranch } = req.body;
+
+//     const existingPlan = await Plan.findOne({
+//       planType,
+//       name,
+//       gymLocation,
+//       gymBranch,
+//     });
+//     if (!existingPlan) {
+//       return next(
+//         new AppError("Plan for this subscription no longer exist", 404)
+//       );
+//     }
+
+//     const isNotGroup = existingPlan.planType === "individual";
+
+//     const currentPlanId =
+//       currentMember?.currentSubscription?.plan?._id?.toString();
+//     const newPlanId = existingPlan._id.toString();
+//     const isSamePlan = currentPlanId === newPlanId;
+
+//     const paymentResponse = await paystackInitializePayment(
+//       req.user.email,
+//       existingPlan.price,
+//       {
+//         phoneNumber: req.user.phoneNumber,
+//         lastName: req.user.lastName,
+//         firstName: req.user.firstName,
+//       }
+//     );
+
+//     const { hashedtoken } = createHashedToken();
+
+//     let update: any = {
+//       $set: {
+//         "currentSubscription.transactionReference":
+//           paymentResponse.data.data.reference,
+//         "currentSubscription.plan": existingPlan._id,
+//         "currentSubscription.startDate": new Date(),
+//         "currentSubscription.subscriptionStatus": "inactive",
+//       },
+//       $unset: {
+//         "currentSubscription.paymentMethod": "",
+//         "currentSubscription.paymentStatus": "",
+//       },
+//     };
+
+//     if (isNotGroup) {
+//       update.$set = {
+//         ...update.$set,
+//         isGroup: false,
+//         groupRole: "none",
+//       };
+//       update.$unset = {
+//         ...update.$unset,
+//         groupSubscription: "",
+//       };
+//     } else if (!isSamePlan && !isNotGroup) {
+//       update.$set = {
+//         ...update.$set,
+//         isGroup: true,
+//         groupRole: "primary",
+//         "groupSubscription.groupType": existingPlan.planType,
+//         "groupSubscription.groupInviteToken": hashedtoken,
+//         "groupSubscription.groupMaxMember":
+//           existingPlan.planType === "couple"
+//             ? 2
+//             : existingPlan.planType === "family"
+//             ? 4
+//             : undefined,
+//         "groupSubscription.dependantMembers": [],
+//       };
+//       update.$unset = {
+//         ...update.$unset,
+//       };
+//     }
+
+//     const updatedMember = await Member.findByIdAndUpdate(req.user._id, update, {
+//       new: true,
+//       runValidators: true,
+//     });
+
+//     // console.log(updatedMember);
+
+//     if (!updatedMember) {
+//       return next(new AppError("Reactivation unsucessful ", 404));
+//     }
+
+//     res.status(200).json({
+//       status: "success",
+//       data: {
+//         authorizationUrl: paymentResponse.data.data.authorization_url,
+//         reference: paymentResponse.data.data.reference,
+//       },
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// export const confirmSubscriptionPayment = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const { reference } = req.params;
+
+//   const verificationResponse = await paystackVerifyPayment(reference);
+
+//   if (
+//     !verificationResponse.status ||
+//     verificationResponse.status !== "success"
+//   ) {
+//     return next(new AppError("Payment verification failed", 400));
+//   }
+
+//   const member = await Member.findOne({
+//     "currentSubscription.transactionReference": reference,
+//   }).populate("currentSubscription.plan");
+//   if (!member) {
+//     return next(new AppError("Member not found", 404));
+//   }
+
+//   const plan = member?.currentSubscription?.plan as any;
+//   if (!plan) {
+//     return next(new AppError("Plan not found for subscription", 404));
+//   }
+
+//   const isIndividualPlan = plan?.planType === "individual";
+//   member.isActive = true;
+//   member.currentSubscription = {
+//     ...member.currentSubscription,
+//     paymentMethod: verificationResponse.payment_type || "card",
+//     subscriptionStatus: "active",
+//     paymentStatus:
+//       verificationResponse.status === "success" ? "approved" : "declined",
+
+//     startDate: new Date(),
+//     autoRenew: false,
+//   };
+
+//   if (isIndividualPlan) {
+//     member.isGroup = false;
+//     member.groupRole = "none";
+//   } else {
+//     member.isGroup = true;
+//   }
+
+//   if (!isIndividualPlan && member.groupSubscription?.dependantMembers?.length) {
+//     const dependantIds = member.groupSubscription.dependantMembers.map(
+//       (dep: any) => dep.member
+//     );
+//     const dependants = await Member.find({ _id: { $in: dependantIds } });
+//     for (const dep of dependants) {
+//       dep.isActive = true;
+//       dep.currentSubscription = {
+//         plan: plan._id,
+//         subscriptionStatus: "active",
+//         startDate: new Date(),
+//         autoRenew: false,
+//         paymentMethod: verificationResponse.payment_type || "card",
+//         paymentStatus: "approved",
+//         transactionReference: reference,
+//       };
+//       await dep.save();
+//     }
+//   }
+
+//   await cancelPaystackSubscription(
+//     member.currentSubscription.subscriptionCode!
+//   );
+//   const subscriptionResponse = await createSubscription({
+//     email: member.email!,
+//     planCode: plan.paystackPlanCode,
+//     authorizationCode: member.currentSubscription?.authorizationCode!,
+//   });
+
+//   member.currentSubscription.subscriptionCode =
+//     subscriptionResponse.data.data.subscription_code;
+//   await member.save();
+
+//   await sendSubscriptionEmail(
+//     "adeniranbayogold@gmail.com",
+//     `${member.firstName}${" "}${member.lastName}`,
+//     `${plan?.name || ""}`,
+//     `${formatDate(member.currentSubscription.endDate!)}`,
+//     plan?.duration!
+//   );
+
+//   res.status(200).json({
+//     status: "success",
+//     message: "subscription reactivation successfull",
+//   });
+// };
+
+/////////////////////////////// new code //////////////////////////////////////
 
 export const reactivateSubscription = async (
   req: Request,
@@ -20,16 +254,14 @@ export const reactivateSubscription = async (
       return next(new AppError("Unauthorised", 401));
     }
 
+    // Remove from group subscription if dependent
     if (
       currentMember.isGroup &&
       currentMember.groupRole === "dependant" &&
       currentMember.groupSubscription?.primaryMember
     ) {
-      const primaryMemberId =
-        currentMember.groupSubscription.primaryMember.toString();
-
       const updatedPrimary = await Member.findOneAndUpdate(
-        { _id: primaryMemberId },
+        { _id: currentMember.groupSubscription.primaryMember },
         {
           $pull: {
             "groupSubscription.dependantMembers": { member: currentMember._id },
@@ -38,14 +270,11 @@ export const reactivateSubscription = async (
         { new: true }
       );
       if (!updatedPrimary) {
-        console.warn(
-          `Primary member ${primaryMemberId} not found or update failed`
-        );
+        return next(new AppError("Failed to update primary member", 500));
       }
     }
 
     const { planType, name, gymLocation, gymBranch } = req.body;
-
     const existingPlan = await Plan.findOne({
       planType,
       name,
@@ -54,82 +283,67 @@ export const reactivateSubscription = async (
     });
     if (!existingPlan) {
       return next(
-        new AppError("Plan for this subscription no longer exist", 404)
+        new AppError("Plan for this subscription no longer exists", 404)
       );
     }
 
     const isNotGroup = existingPlan.planType === "individual";
-
     const currentPlanId =
       currentMember?.currentSubscription?.plan?._id?.toString();
-    const newPlanId = existingPlan._id.toString();
-    const isSamePlan = currentPlanId === newPlanId;
+    const isSamePlan = currentPlanId === existingPlan._id.toString();
 
     const paymentResponse = await paystackInitializePayment(
-      req.user.email,
+      currentMember.email,
       existingPlan.price,
       {
-        phoneNumber: req.user.phoneNumber,
-        lastName: req.user.lastName,
-        firstName: req.user.firstName,
+        phoneNumber: currentMember.phoneNumber,
+        lastName: currentMember.lastName,
+        firstName: currentMember.firstName,
       }
     );
 
-    const { hashedtoken } = createHashedToken();
+    if (!paymentResponse.status || paymentResponse.data.status !== "success") {
+      return next(new AppError("Failed to initialize payment", 500));
+    }
 
-    let update: any = {
+    const { hashedtoken } = createHashedToken();
+    const update = {
       $set: {
         "currentSubscription.transactionReference":
           paymentResponse.data.data.reference,
         "currentSubscription.plan": existingPlan._id,
         "currentSubscription.startDate": new Date(),
         "currentSubscription.subscriptionStatus": "inactive",
+        ...(isNotGroup
+          ? { isGroup: false, groupRole: "none" }
+          : {
+              isGroup: true,
+              groupRole: "primary",
+              "groupSubscription.groupType": existingPlan.planType,
+              "groupSubscription.groupInviteToken": hashedtoken,
+              "groupSubscription.groupMaxMember":
+                existingPlan.planType === "couple" ? 2 : 4,
+              "groupSubscription.dependantMembers": [],
+            }),
       },
       $unset: {
         "currentSubscription.paymentMethod": "",
         "currentSubscription.paymentStatus": "",
+        ...(!isNotGroup ? {} : { groupSubscription: "" }),
       },
     };
 
-    if (isNotGroup) {
-      update.$set = {
-        ...update.$set,
-        isGroup: false,
-        groupRole: "none",
-      };
-      update.$unset = {
-        ...update.$unset,
-        groupSubscription: "",
-      };
-    } else if (!isSamePlan && !isNotGroup) {
-      update.$set = {
-        ...update.$set,
-        isGroup: true,
-        groupRole: "primary",
-        "groupSubscription.groupType": existingPlan.planType,
-        "groupSubscription.groupInviteToken": hashedtoken,
-        "groupSubscription.groupMaxMember":
-          existingPlan.planType === "couple"
-            ? 2
-            : existingPlan.planType === "family"
-            ? 4
-            : undefined,
-        "groupSubscription.dependantMembers": [],
-      };
-      update.$unset = {
-        ...update.$unset,
-      };
-    }
-
-    const updatedMember = await Member.findByIdAndUpdate(req.user._id, update, {
-      new: true,
-      runValidators: true,
-    });
-
-    // console.log(updatedMember);
+    const updatedMember = await Member.findByIdAndUpdate(
+      currentMember._id,
+      update,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!updatedMember) {
-      return next(new AppError("Reactivation unsucessful ", 404));
+      return next(new AppError("Reactivation unsuccessful", 404));
     }
 
     res.status(200).json({
@@ -149,84 +363,110 @@ export const confirmSubscriptionPayment = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { reference } = req.params;
+  try {
+    const { reference } = req.params;
+    const verificationResponse = await paystackVerifyPayment(reference);
 
-  const verificationResponse = await paystackVerifyPayment(reference);
-
-  if (
-    !verificationResponse.status ||
-    verificationResponse.status !== "success"
-  ) {
-    return next(new AppError("Payment verification failed", 400));
-  }
-
-  const member = await Member.findOne({
-    "currentSubscription.transactionReference": reference,
-  }).populate("currentSubscription.plan");
-  if (!member) {
-    return next(new AppError("Member not found", 404));
-  }
-
-  // const plan = await Plan.findById(member?.currentSubscription?.plan);
-  const plan = member?.currentSubscription?.plan as any;
-  if (!plan) {
-    return next(new AppError("Plan not found for subscription", 404));
-  }
-
-  const isIndividualPlan = plan?.planType === "individual";
-  member.isActive = true;
-  member.currentSubscription = {
-    ...member.currentSubscription,
-    paymentMethod: verificationResponse.payment_type || "card",
-    subscriptionStatus: "active",
-    paymentStatus:
-      verificationResponse.status === "success" ? "approved" : "declined",
-
-    startDate: new Date(),
-    autoRenew: false,
-  };
-
-  if (isIndividualPlan) {
-    member.isGroup = false;
-    member.groupRole = "none";
-  } else {
-    member.isGroup = true;
-  }
-
-  if (!isIndividualPlan && member.groupSubscription?.dependantMembers?.length) {
-    const dependantIds = member.groupSubscription.dependantMembers.map(
-      (dep: any) => dep.member
-    );
-    const dependants = await Member.find({ _id: { $in: dependantIds } });
-    for (const dep of dependants) {
-      dep.isActive = true;
-      dep.currentSubscription = {
-        plan: plan._id,
-        subscriptionStatus: "active",
-        startDate: new Date(),
-        autoRenew: false,
-        paymentMethod: verificationResponse.payment_type || "card",
-        paymentStatus: "approved",
-        transactionReference: reference,
-      };
-      await dep.save();
+    if (!verificationResponse.status) {
+      return next(new AppError("Payment verification failed", 400));
     }
+
+    const member = await Member.findOne({
+      "currentSubscription.transactionReference": reference,
+    }).populate("currentSubscription.plan");
+    if (!member) {
+      return next(new AppError("Member not found", 404));
+    }
+
+    const plan = member.currentSubscription?.plan as any;
+    if (!plan) {
+      return next(new AppError("Plan not found for subscription", 404));
+    }
+
+    const isIndividualPlan = plan.planType === "individual";
+    member.isActive = true;
+    member.currentSubscription = {
+      ...member.currentSubscription,
+      paymentMethod: verificationResponse.payment_type || "card",
+      subscriptionStatus: "active",
+      paymentStatus: "approved",
+      startDate: new Date(),
+      autoRenew: false,
+    };
+
+    if (isIndividualPlan) {
+      member.isGroup = false;
+      member.groupRole = "none";
+    } else {
+      member.isGroup = true;
+    }
+
+    if (
+      !isIndividualPlan &&
+      member.groupSubscription?.dependantMembers?.length
+    ) {
+      const dependantIds = member.groupSubscription.dependantMembers.map(
+        (dep: any) => dep.member
+      );
+      const dependants = await Member.find({ _id: { $in: dependantIds } });
+      for (const dep of dependants) {
+        dep.isActive = true;
+        dep.currentSubscription = {
+          plan: plan._id,
+          subscriptionStatus: "active",
+          startDate: new Date(),
+          autoRenew: false,
+          paymentMethod: verificationResponse.payment_type || "card",
+          paymentStatus: "approved",
+          transactionReference: reference,
+        };
+        await dep.save();
+      }
+    }
+
+    if (member.currentSubscription.subscriptionCode) {
+      const cancelResponse = await cancelPaystackSubscription(
+        member.currentSubscription.subscriptionCode
+      );
+      if (!cancelResponse.status) {
+        return next(
+          new AppError("Failed to cancel previous subscription", 500)
+        );
+      }
+    }
+
+    const subscriptionResponse = await createSubscription({
+      email: member.email!,
+      planCode: plan.paystackPlanCode,
+      authorizationCode: member.currentSubscription?.authorizationCode!,
+    });
+
+    if (
+      !subscriptionResponse.status ||
+      subscriptionResponse.data.status !== "success"
+    ) {
+      return next(new AppError("Failed to create new subscription", 500));
+    }
+
+    member.currentSubscription.subscriptionCode =
+      subscriptionResponse.data.data.subscription_code;
+    await member.save();
+
+    await sendSubscriptionEmail(
+      "adeniranbayogold@gmail.com",
+      `${member.firstName} ${member.lastName}`,
+      plan.name,
+      formatDate(member.currentSubscription.endDate!),
+      plan.duration
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "Subscription reactivation successful",
+    });
+  } catch (error) {
+    next(error);
   }
-
-  await member.save();
-
-  await sendSubscriptionEmail(
-    "adeniranbayogold@gmail.com",
-    `${member.firstName}${" "}${member.lastName}`,
-    `${plan?.name || ""}`,
-    `${formatDate(member.currentSubscription.endDate!)}`,
-    plan?.duration!
-  );
-
-  res.status(200).json({
-    status: "success",
-    message: "subscription reactivation successfull",
-  });
 };
 
 export const cancelSubscription = async (
