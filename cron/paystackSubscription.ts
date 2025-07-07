@@ -35,8 +35,6 @@ const chargeRecurringPayments = async () => {
         $lte: endOfRetryWindow,
       },
 
-      "currentSubscription. subscriptionCode": { $exists: true },
-
       "currentSubscription.authorizationCode": { $exists: true },
     })
       .populate("currentSubscription.plan")

@@ -102,7 +102,7 @@ export const updatePaystackPlan = async ({
 
     return response;
   } catch (err) {
-    throw new AppError("Failed to create Paystack plan", 500);
+    throw new AppError("Failed to update plan in Paystack plan", 500);
   }
 };
 
@@ -188,7 +188,7 @@ export const createSubscription = async ({
   authorizationCode: string;
 }) => {
   try {
-    const response = await paystack.put(`/subscription`, {
+    const response = await paystack.post(`/subscription`, {
       customer: email,
       plan: planCode,
       authorization: authorizationCode,
@@ -198,7 +198,7 @@ export const createSubscription = async ({
 
     return response;
   } catch (err) {
-    throw new AppError("Failed to create Paystack plan", 500);
+    throw new AppError("Failed to create subscription", 500);
   }
 };
 
