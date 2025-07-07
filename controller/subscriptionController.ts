@@ -435,21 +435,24 @@ export const confirmSubscriptionPayment = async (
       }
     }
 
-    const subscriptionResponse = await createSubscription({
-      email: member.email!,
-      planCode: plan.paystackPlanCode,
-      authorizationCode: member.currentSubscription?.authorizationCode!,
-    });
+    if (plan?.name !== "2-months") {
+      const subscriptionResponse = await createSubscription({
+        email: member.email!,
+        planCode: plan.paystackPlanCode,
+        authorizationCode: member.currentSubscription?.authorizationCode!,
+      });
 
-    if (
-      !subscriptionResponse.status ||
-      subscriptionResponse.data.status !== "success"
-    ) {
-      return next(new AppError("Failed to create new subscription", 500));
+      if (
+        !subscriptionResponse.status ||
+        subscriptionResponse.data.status !== "success"
+      ) {
+        return next(new AppError("Failed to create new subscription", 500));
+      }
+
+      member.currentSubscription.subscriptionCode =
+        subscriptionResponse.data.data.subscription_code;
     }
 
-    member.currentSubscription.subscriptionCode =
-      subscriptionResponse.data.data.subscription_code;
     await member.save();
 
     await sendSubscriptionEmail(
