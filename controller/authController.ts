@@ -155,12 +155,14 @@ export const verifyPaymentAndActivate = async (
         authorizationCode: verificationResponse.authorization_code,
       });
 
-      if (!subscriptionResponse.data.status) {
+      if (subscriptionResponse.data.status !== true) {
         throw new AppError(`Failed to create subscription`, 500);
       }
       if (member.currentSubscription) {
         member.currentSubscription.subscriptionCode =
           subscriptionResponse.data.data.subscription_code;
+        member.currentSubscription.paystackEmailToken =
+          subscriptionResponse.data.data.email_token;
       }
     }
 

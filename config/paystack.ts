@@ -73,7 +73,7 @@ export const createPaystackPlan = async (
       interval,
     });
 
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {
@@ -98,7 +98,7 @@ export const updatePaystackPlan = async ({
       interval,
     });
 
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {
@@ -170,7 +170,7 @@ export const chargeAuthorisation = async ({
       authorization_code: authorizationCode,
     });
 
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {
@@ -194,24 +194,31 @@ export const createSubscription = async ({
       authorization: authorizationCode,
     });
 
-    console.log(response);
-
     return response;
   } catch (err) {
     throw new AppError("Failed to create subscription", 500);
   }
 };
 
-export const cancelPaystackSubscription = async (subscriptionCode: string) => {
+export const cancelPaystackSubscription = async ({
+  subscriptionCode,
+  emailToken,
+}: {
+  subscriptionCode: string;
+  emailToken: string;
+}) => {
   try {
     const response = await paystack.post(`/subscription/disable`, {
       code: subscriptionCode,
+      token: emailToken,
     });
 
-    console.log(response);
+    // console.log(response);
 
     return response;
   } catch (err) {
+    console.log(err);
+
     throw new AppError("Failed to cancel Paystack subscription", 500);
   }
 };

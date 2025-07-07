@@ -293,17 +293,17 @@ export const reactivateSubscription = async (
     const isSamePlan = currentPlanId === existingPlan._id.toString();
 
     const paymentResponse = await paystackInitializePayment(
-      currentMember.email,
+      req.user.email,
       existingPlan.price,
       {
-        phoneNumber: currentMember.phoneNumber,
-        lastName: currentMember.lastName,
-        firstName: currentMember.firstName,
+        phoneNumber: req.user.phoneNumber,
+        lastName: req.user.lastName,
+        firstName: req.user.firstName,
       }
     );
 
-    if (!paymentResponse.status || paymentResponse.data.status !== "success") {
-      return next(new AppError("Failed to initialize payment", 500));
+    if (paymentResponse.data.status !== true) {
+      return next(new AppError("Failed to initializess payment", 500));
     }
 
     const { hashedtoken } = createHashedToken();
@@ -385,6 +385,12 @@ export const confirmSubscriptionPayment = async (
 
     const isIndividualPlan = plan.planType === "individual";
     member.isActive = true;
+    const cardDetails = {
+      lastDigits: verificationResponse.lastCardDigits,
+      cardType: verificationResponse.cardType,
+      expMonth: verificationResponse.exp_month,
+      expYear: verificationResponse.exp_year,
+    };
     member.currentSubscription = {
       ...member.currentSubscription,
       paymentMethod: verificationResponse.payment_type || "card",
@@ -392,6 +398,7 @@ export const confirmSubscriptionPayment = async (
       paymentStatus: "approved",
       startDate: new Date(),
       autoRenew: false,
+      cardDetails,
     };
 
     if (isIndividualPlan) {
@@ -424,10 +431,14 @@ export const confirmSubscriptionPayment = async (
       }
     }
 
-    if (member.currentSubscription.subscriptionCode) {
-      const cancelResponse = await cancelPaystackSubscription(
-        member.currentSubscription.subscriptionCode
-      );
+    if (
+      member.currentSubscription.subscriptionCode &&
+      member.currentSubscription.paystackEmailToken
+    ) {
+      const cancelResponse = await cancelPaystackSubscription({
+        subscriptionCode: member.currentSubscription.subscriptionCode,
+        emailToken: member.currentSubscription.paystackEmailToken,
+      });
       if (!cancelResponse.status) {
         return next(
           new AppError("Failed to cancel previous subscription", 500)
@@ -442,10 +453,7 @@ export const confirmSubscriptionPayment = async (
         authorizationCode: member.currentSubscription?.authorizationCode!,
       });
 
-      if (
-        !subscriptionResponse.status ||
-        subscriptionResponse.data.status !== "success"
-      ) {
+      if (subscriptionResponse.data.status !== true) {
         return next(new AppError("Failed to create new subscription", 500));
       }
 
@@ -469,6 +477,7 @@ export const confirmSubscriptionPayment = async (
     });
   } catch (error) {
     next(error);
+    console.log(error);
   }
 };
 

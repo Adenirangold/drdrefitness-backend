@@ -237,6 +237,7 @@ const memberSchema = new Schema(
         expYear: String,
       },
       subscriptionCode: { type: String, index: true },
+      paystackEmailToken: String,
     },
 
     membershipHistory: [

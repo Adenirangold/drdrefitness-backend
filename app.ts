@@ -22,7 +22,10 @@ import cors from "cors";
 import { seedDatabase } from "./seed";
 import { setupSocket } from "./config/socket";
 import { setupCronJobs } from "./cron/updateSubsriptionStatus";
-import { updateExistingPlans } from "./config/paystack";
+import {
+  cancelPaystackSubscription,
+  updateExistingPlans,
+} from "./config/paystack";
 
 dotenv.config();
 const app = express();
@@ -75,6 +78,8 @@ setupCronJobs();
 export const io = setupSocket(ioServer);
 
 connectDatabase();
+
+// cancelPaystackSubscription("SUB_75ujr3y1vodaorf");
 
 server.listen(process.env.PORT, async () => {
   console.log(`Server running on port ${process.env.PORT}`);
