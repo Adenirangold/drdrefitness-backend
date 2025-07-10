@@ -128,10 +128,3 @@ export const getAllCoupons = async (
     next(error);
   }
 };
-
-// Example route usage in your Express app
-// import { createCoupon, updateCoupon, deleteCoupon, getAllCoupons } from "./couponRoutes";
-// app.post("/coupons", isDirector, createCoupon);
-// app.put("/coupons/:couponId", isDirector, updateCoupon);
-// app.delete("/coupons/:couponId", isDirector, deleteCoupon);
-// app.get("/coupons", isDirector, getAllCoupons);
