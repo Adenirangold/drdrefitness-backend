@@ -1,0 +1,61 @@
+import mongoose from "mongoose";
+import { Schema } from "mongoose";
+
+const couponSchema = new Schema(
+  {
+    code: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      uppercase: true,
+      minlength: 4,
+      maxlength: 20,
+    },
+    discountType: {
+      type: String,
+      enum: ["percentage", "fixed"],
+      required: true,
+    },
+    discountValue: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    applicablePlans: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Plan",
+      },
+    ],
+    validFrom: {
+      type: Date,
+      required: true,
+    },
+    validUntil: {
+      type: Date,
+      required: true,
+    },
+    maxUses: {
+      type: Number,
+      min: 0,
+      default: null, // Null means unlimited uses
+    },
+    currentUses: {
+      type: Number,
+      default: 0,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "Member",
+      required: true,
+    },
+  },
+  { timestamps: true }
+);
+
+couponSchema.index({ code: 1 });
+couponSchema.index({ validFrom: 1, validUntil: 1 });
+
+export const Coupon = mongoose.model("Coupon", couponSchema);
+export default Coupon;

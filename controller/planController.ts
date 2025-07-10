@@ -8,8 +8,9 @@ export const createPlan = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { planType, name, gymLocation, gymBranch } = req.body;
+  const { planType, name, gymLocation, gymBranch, price } = req.body;
   try {
+    // Check for existing plan
     const existingPlan = await Plan.findOne({
       name,
       gymLocation,
@@ -18,9 +19,10 @@ export const createPlan = async (
     });
 
     if (existingPlan) {
-      return next(new AppError("plan already exist", 409));
+      return next(new AppError("Plan already exists", 409));
     }
 
+    // Determine interval based on plan name
     let interval = "monthly";
     if (name === "3-months") {
       interval = "quarterly";
@@ -32,19 +34,44 @@ export const createPlan = async (
 
     const planName = `${gymLocation}-${gymBranch}-${planType}-${name}`;
 
-    const paystackResponse = await createPaystackPlan(
-      planName,
-      req.body.price,
-      interval
-    );
-    console.log(paystackResponse);
+    // Start a database transaction (if your ORM supports it, e.g., Mongoose with sessions)
+    const session = await Plan.startSession();
+    session.startTransaction();
 
-    await Plan.create({
-      ...req.body,
-      paystackPlanCode: paystackResponse.data.data.plan_code,
-    });
+    try {
+      // Create plan in database first
+      const newPlan = await Plan.create(
+        [
+          {
+            ...req.body,
+            paystackPlanCode: null,
+          },
+        ],
+        { session }
+      );
 
-    res.status(201).json({ status: "success", message: "plan created" });
+      // Create plan in Paystack
+      const paystackResponse = await createPaystackPlan(
+        planName,
+        price,
+        interval
+      );
+
+      await Plan.updateOne(
+        { _id: newPlan[0]._id },
+        { paystackPlanCode: paystackResponse.data.data.plan_code },
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      res.status(201).json({ status: "success", message: "Plan created" });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
   } catch (error) {
     next(error);
   }
@@ -138,10 +165,10 @@ export const updatePlan = async (
     if (!plan.paystackPlanCode) {
       return next(new AppError("Paystack plan code not found", 400));
     }
-
+    const planName = `${plan.gymLocation}-${plan.gymBranch}-${plan.planType}-${plan.name}`;
     await updatePaystackPlan({
       paystackPlanCode: plan.paystackPlanCode || "",
-      name: plan.name,
+      name: planName,
       price: plan.price,
       interval,
     });
