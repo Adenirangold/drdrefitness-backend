@@ -31,12 +31,16 @@ export const planSchema = z.object({
   duration: z.coerce.number().positive(),
 });
 
-export const currentSubscriptionSchema = planSchema.pick({
-  planType: true,
-  name: true,
-  gymBranch: true,
-  gymLocation: true,
-});
+export const currentSubscriptionSchema = planSchema
+  .pick({
+    planType: true,
+    name: true,
+    gymBranch: true,
+    gymLocation: true,
+  })
+  .extend({
+    couponCode: z.string().optional(),
+  });
 
 export const adminLocationSchema = z.object({
   location: z.string().min(2).max(50),
@@ -138,7 +142,9 @@ export const passwordresetSchema = z
     path: ["confirmPassword"],
   });
 
-export const reactivateSubscriptionSchema = planSchema.partial();
+export const reactivateSubscriptionSchema = planSchema.partial().extend({
+  couponCode: z.string().optional(),
+});
 export const updatePlanSchema = planSchema.partial();
 export const updateAdminSchema = adminSchema.partial();
 
@@ -178,3 +184,54 @@ export const checkInOutHistorySchema = z.object({
     })
   ),
 });
+
+// ///////////////////// coupon schema //////////////////////
+
+const objectIdSchema = z
+  .string()
+  .refine((val) => mongoose.Types.ObjectId.isValid(val), {
+    message: "Invalid ObjectId format",
+  });
+
+export const couponSchema = z
+  .object({
+    code: z.string().nonempty("Code is required").trim(),
+    discountType: z.enum(["percentage", "fixed"], {
+      errorMap: () => ({
+        message: "Discount type must be 'percentage' or 'fixed'",
+      }),
+    }),
+    discountValue: z
+      .number()
+      .min(0, "Discount value must be non-negative")
+      .positive("Discount value is required"),
+    applicablePlans: z.array(objectIdSchema).optional(),
+    validFrom: z
+      .string()
+      .nonempty("Valid from date is required")
+      .refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid date format for validFrom",
+      }),
+    validUntil: z
+      .string()
+      .nonempty("Valid until date is required")
+      .refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid date format for validUntil",
+      }),
+    maxUses: z
+      .number()
+      .min(0, "Max uses must be non-negative")
+      .nullable()
+      .optional(),
+    currentUses: z
+      .number()
+      .min(0, "Current uses must be non-negative")
+      .default(0),
+    createdBy: objectIdSchema,
+  })
+  .refine((data) => new Date(data.validFrom) < new Date(data.validUntil), {
+    message: "End Date must be greater than Start Date",
+    path: ["validUntil"],
+  });
+
+export const couponUpdateSchema = couponSchema.innerType().partial();

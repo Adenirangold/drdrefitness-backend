@@ -13,6 +13,7 @@ import paystackRoute from "./routes/paystackRoute";
 import workflowRoute from "./routes/workflowRoute";
 import stationRoute from "./routes/stationRoute";
 import checkInOutRoute from "./routes/checkInOutRoute";
+import couponRoute from "./routes/couponRoute";
 import { configureSecurityMiddleware } from "./middleware/security";
 import errorHandler from "./middleware/errorHandler";
 import bodyParser from "body-parser";
@@ -70,6 +71,7 @@ app.use("/api/paystack", paystackRoute);
 app.use("/api/workflow", workflowRoute);
 app.use("/api/station", stationRoute);
 app.use("/api/checkinout", checkInOutRoute);
+app.use("/api/coupons", couponRoute);
 
 app.use(errorHandler);
 
