@@ -8,9 +8,6 @@ const couponSchema = new Schema(
       required: true,
       unique: true,
       trim: true,
-      uppercase: true,
-      minlength: 4,
-      maxlength: 20,
     },
     discountType: {
       type: String,
@@ -39,7 +36,7 @@ const couponSchema = new Schema(
     maxUses: {
       type: Number,
       min: 0,
-      default: null, // Null means unlimited uses
+      default: null,
     },
     currentUses: {
       type: Number,
