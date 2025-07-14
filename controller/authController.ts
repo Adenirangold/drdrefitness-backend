@@ -27,6 +27,7 @@ export const signup = async (
     if (req.body.role && req.body.role !== "member") {
       return next(new AppError("Unauthorised to create an admin account", 403));
     }
+
     const prevUser = await Member.findOne({ email: req.body.email }).select(
       "email"
     );
@@ -154,6 +155,9 @@ export const verifyPaymentAndActivate = async (
         planCode: plan.paystackPlanCode,
         authorizationCode: verificationResponse.authorization_code,
       });
+
+      console.log("subscriptionResponse", subscriptionResponse);
+      console.log("heyy");
 
       if (subscriptionResponse.data.status !== true) {
         throw new AppError(`Failed to create subscription`, 500);
