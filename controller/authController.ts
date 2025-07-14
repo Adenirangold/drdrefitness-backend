@@ -17,6 +17,7 @@ import {
   paystackInitializePayment,
   paystackVerifyPayment,
 } from "../config/paystack";
+import Coupon from "../models/coupons";
 
 export const signup = async (
   req: Request,
@@ -40,7 +41,7 @@ export const signup = async (
       );
     }
 
-    const { planType, name, gymLocation, gymBranch } =
+    const { planType, name, gymLocation, gymBranch, couponCode } =
       req.body.currentSubscription;
 
     const plan = await Plan.findOne({
@@ -54,9 +55,37 @@ export const signup = async (
       return next(new AppError("Invalid subscription plan", 400));
     }
 
+    let amount = plan.price;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode,
+        applicablePlans: plan._id,
+        validFrom: { $lte: new Date() },
+        validUntil: { $gte: new Date() },
+        $or: [
+          { maxUses: null },
+          { $expr: { $lt: ["$currentUses", "$maxUses"] } },
+        ],
+      });
+
+      if (!coupon) {
+        return next(new AppError("Invalid or expired coupon code", 400));
+      }
+
+      if (coupon.discountType === "percentage") {
+        amount = plan.price * (1 - coupon.discountValue / 100);
+      } else {
+        amount = Math.max(0, plan.price - coupon.discountValue);
+      }
+
+      // Increment coupon usage
+      await Coupon.updateOne({ _id: coupon._id }, { $inc: { currentUses: 1 } });
+    }
+
     const paymentResponse = await paystackInitializePayment(
       req.body.email,
-      plan.price,
+      amount,
       {
         phoneNumber: req.body.phoneNumber,
         lastName: req.body.lastName,

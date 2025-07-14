@@ -10,6 +10,7 @@ import {
 } from "../config/paystack";
 import { sendSubscriptionEmail, sendWelcomeEmail } from "../config/email";
 import { createHashedToken, formatDate } from "../lib/util";
+import Coupon from "../models/coupons";
 
 // export const reactivateSubscription = async (
 //   req: Request,
@@ -274,7 +275,7 @@ export const reactivateSubscription = async (
       }
     }
 
-    const { planType, name, gymLocation, gymBranch } = req.body;
+    const { planType, name, gymLocation, gymBranch, couponCode } = req.body;
     const existingPlan = await Plan.findOne({
       planType,
       name,
@@ -287,6 +288,34 @@ export const reactivateSubscription = async (
       );
     }
 
+    let amount = existingPlan.price;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({
+        code: couponCode,
+        applicablePlans: existingPlan._id,
+        validFrom: { $lte: new Date() },
+        validUntil: { $gte: new Date() },
+        $or: [
+          { maxUses: null },
+          { $expr: { $lt: ["$currentUses", "$maxUses"] } },
+        ],
+      });
+
+      if (!coupon) {
+        return next(new AppError("Invalid or expired coupon code", 400));
+      }
+
+      if (coupon.discountType === "percentage") {
+        amount = existingPlan.price * (1 - coupon.discountValue / 100);
+      } else {
+        amount = Math.max(0, existingPlan.price - coupon.discountValue);
+      }
+
+      // Increment coupon usage
+      await Coupon.updateOne({ _id: coupon._id }, { $inc: { currentUses: 1 } });
+    }
+
     const isNotGroup = existingPlan.planType === "individual";
     const currentPlanId =
       currentMember?.currentSubscription?.plan?._id?.toString();
@@ -294,7 +323,7 @@ export const reactivateSubscription = async (
 
     const paymentResponse = await paystackInitializePayment(
       req.user.email,
-      existingPlan.price,
+      amount,
       {
         phoneNumber: req.user.phoneNumber,
         lastName: req.user.lastName,
