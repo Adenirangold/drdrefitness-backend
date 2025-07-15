@@ -36,7 +36,7 @@ const errorHandler: ErrorRequestHandler = (
     const field = Object.keys(err.keyValue)[0];
     const value = err.keyValue[field];
     error = new AppError(
-      `Duplicate field value: ${field}: ${value}. Please use another value.`,
+      `The ${field} '${value}' is already in use. Please choose a different one.`,
       400
     );
   }

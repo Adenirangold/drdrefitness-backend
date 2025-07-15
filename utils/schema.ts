@@ -205,7 +205,7 @@ export const couponSchema = z
       .number()
       .min(0, "Discount value must be non-negative")
       .positive("Discount value is required"),
-    applicablePlans: z.array(objectIdSchema).optional(),
+    applicablePlans: z.array(objectIdSchema),
     validFrom: z
       .string()
       .nonempty("Valid from date is required")
@@ -223,11 +223,6 @@ export const couponSchema = z
       .min(0, "Max uses must be non-negative")
       .nullable()
       .optional(),
-    currentUses: z
-      .number()
-      .min(0, "Current uses must be non-negative")
-      .default(0),
-    createdBy: objectIdSchema,
   })
   .refine((data) => new Date(data.validFrom) < new Date(data.validUntil), {
     message: "End Date must be greater than Start Date",
