@@ -79,11 +79,14 @@ setupCronJobs();
 
 export const io = setupSocket(ioServer);
 
-connectDatabase();
+// connectDatabase();
 
 // cancelPaystackSubscription("SUB_75ujr3y1vodaorf");
 
 server.listen(process.env.PORT, async () => {
+  console.log(`Server running on port ${process.env.PORT}`);
+  console.log(`Server running on port ${process.env.PORT}`);
+  console.log(`Server running on port ${process.env.PORT}`);
   console.log(`Server running on port ${process.env.PORT}`);
 });
 // seedDatabase();
