@@ -79,7 +79,7 @@ setupCronJobs();
 
 export const io = setupSocket(ioServer);
 
-// connectDatabase();
+connectDatabase();
 
 // cancelPaystackSubscription("SUB_75ujr3y1vodaorf");
 
