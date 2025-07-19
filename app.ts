@@ -27,6 +27,7 @@ import {
   cancelPaystackSubscription,
   updateExistingPlans,
 } from "./config/paystack";
+import { setupCronJobsPayment } from "./cron/paystackSubscription";
 
 dotenv.config();
 const app = express();
@@ -76,12 +77,11 @@ app.use("/api/coupons", couponRoute);
 app.use(errorHandler);
 
 setupCronJobs();
+setupCronJobsPayment();
 
 export const io = setupSocket(ioServer);
 
 connectDatabase();
-
-// cancelPaystackSubscription("SUB_75ujr3y1vodaorf");
 
 server.listen(process.env.PORT, async () => {
   console.log(`Server running on port ${process.env.PORT}`);

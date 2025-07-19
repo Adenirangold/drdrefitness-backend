@@ -68,6 +68,24 @@ const chargeRecurringPayments = async () => {
           },
           { session }
         );
+        console.log(
+          `Processed ${members.length} members at ${new Date().toLocaleString(
+            "en-US",
+            {
+              timeZone: "Africa/Lagos",
+            }
+          )}`
+        );
+        if (response.data.status && response.data.data.status === "success") {
+          console.log(
+            `Successfully charged member ${member._id} for plan ${plan.name}`
+          );
+        } else {
+          console.error(
+            `Failed to charge member ${member._id}:`,
+            response.data
+          );
+        }
       } else {
         await Member.updateOne(
           { _id: member._id },
@@ -94,9 +112,19 @@ const chargeRecurringPayments = async () => {
     console.error("Error charging recurring payments:", error);
   } finally {
     session.endSession();
+    console.log(
+      "Cron job completed at",
+      new Date().toLocaleString("en-US", {
+        timeZone: "Africa/Lagos",
+      })
+    );
   }
 };
 
 // Run every day at midnight
-cron.schedule("0 0 * * *", chargeRecurringPayments);
-export default chargeRecurringPayments;
+
+export function setupCronJobsPayment() {
+  cron.schedule("0 0 * * *", chargeRecurringPayments, {
+    timezone: "Africa/Lagos", // WAT
+  });
+}
