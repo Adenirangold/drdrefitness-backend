@@ -121,7 +121,12 @@ export const acceptGroupInvitation = async (
     const decodedToken = verifyToken(req.params.id!);
 
     if (decodedToken?.email !== req.body.email) {
-      return next(new AppError("Unauthorized to join group", 401));
+      return next(
+        new AppError(
+          "You're not authorized to join this group. Please ensure you're signing up with the same email address that received the invitation",
+          401
+        )
+      );
     }
 
     const primaryMember = await Member.findOne({
