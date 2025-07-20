@@ -196,6 +196,8 @@ export const createSubscription = async ({
 
     return response;
   } catch (err) {
+    console.log(err);
+
     throw new AppError("Failed to create subscriptionssss", 500);
   }
 };

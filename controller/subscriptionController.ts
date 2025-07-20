@@ -356,8 +356,15 @@ export const reactivateSubscription = async (
             }),
       },
       $unset: {
+        // "currentSubscription.paymentMethod": "",
+        // "currentSubscription.paymentStatus": "",
+        // ...(!isNotGroup ? {} : { groupSubscription: "" }),
         "currentSubscription.paymentMethod": "",
         "currentSubscription.paymentStatus": "",
+        "currentSubscription.authorizationCode": "",
+        "currentSubscription.cardDetails": "",
+        "currentSubscription.subscriptionCode": "",
+        "currentSubscription.paystackEmailToken": "",
         ...(!isNotGroup ? {} : { groupSubscription: "" }),
       },
     };
@@ -475,11 +482,13 @@ export const confirmSubscriptionPayment = async (
       }
     }
 
+    console.log(verificationResponse.authorization_code);
+
     if (plan?.name !== "2-months") {
       const subscriptionResponse = await createSubscription({
         email: member.email!,
         planCode: plan.paystackPlanCode,
-        authorizationCode: member.currentSubscription?.authorizationCode!,
+        authorizationCode: verificationResponse.authorization_code,
       });
 
       if (subscriptionResponse.data.status !== true) {
@@ -488,6 +497,8 @@ export const confirmSubscriptionPayment = async (
 
       member.currentSubscription.subscriptionCode =
         subscriptionResponse.data.data.subscription_code;
+      member.currentSubscription.paystackEmailToken =
+        subscriptionResponse.data.data.email_token;
     }
 
     await member.save();

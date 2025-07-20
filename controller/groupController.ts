@@ -6,6 +6,7 @@ import { log } from "console";
 import Member from "../models/member";
 import { getJWTToken, verifyToken } from "../lib/util";
 import mongoose from "mongoose";
+import { cancelPaystackSubscription } from "../config/paystack";
 
 export const sendGroupInvitation = async (
   req: Request,
@@ -196,6 +197,23 @@ export const acceptGroupInvitation = async (
             400
           )
         );
+      }
+
+      // Cancel existing Paystack subscription if it exists
+      if (
+        dependantMember.currentSubscription?.subscriptionCode &&
+        dependantMember.currentSubscription?.paystackEmailToken
+      ) {
+        const cancelResponse = await cancelPaystackSubscription({
+          subscriptionCode:
+            dependantMember.currentSubscription.subscriptionCode,
+          emailToken: dependantMember.currentSubscription.paystackEmailToken,
+        });
+        if (!cancelResponse.status) {
+          return next(
+            new AppError("Failed to cancel existing subscription", 500)
+          );
+        }
       }
 
       // Reset if they were a primary member with no dependants
