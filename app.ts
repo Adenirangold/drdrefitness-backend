@@ -90,6 +90,5 @@ server.listen(process.env.PORT, async () => {
   console.log(`Server running on port ${process.env.PORT}`);
   console.log(`Server running on port ${process.env.PORT}`);
   console.log(`Server running on port ${process.env.PORT}`);
-  console.log(`Server running on port ${process.env.PORT}`);
 });
 // seedDatabase();
