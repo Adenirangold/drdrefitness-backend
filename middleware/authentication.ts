@@ -12,6 +12,12 @@ const hasAccess = (userRole: Role, requiredRole: Role) => {
 
   return (
     rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
+    rolesHierarchy.indexOf(userRole) >= rolesHierarchy.indexOf(requiredRole)
   );
 };
 
