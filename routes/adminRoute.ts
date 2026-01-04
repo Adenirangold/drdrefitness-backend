@@ -24,7 +24,7 @@ router.get(
   adminController.getAdminBranchMember
   adminController.getAdminBranchMember
   adminController.getAdminBranchMember
-  adminController.getAdminBranchMember
+
 );
 
 export default router;
