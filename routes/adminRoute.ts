@@ -19,6 +19,12 @@ router.get(
   "/",
   autheticateMember("admin"),
   adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
+  adminController.getAdminBranchMember
 );
 
 export default router;
